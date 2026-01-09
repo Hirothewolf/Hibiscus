@@ -34,7 +34,7 @@
 |---------|-------------|
 | 🎨 **Image Generation** | Create stunning images with Flux, Turbo, GPT-Image, and more |
 | ✏️ **Image Editing** | Transform existing images with AI-powered img2img |
-| 🎬 **Video Generation** | Generate videos with Veo 2, Seedance models |
+| 🎬 **Video Generation** | Generate videos with Veo, Seedance models |
 | 📁 **Smart Gallery** | Automatic organization by date with persistence |
 | 💾 **Auto-Download** | Save creations automatically to organized folders |
 | 🔄 **Smart Retry** | Exponential backoff + safety filter persistence |
