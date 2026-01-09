@@ -10,6 +10,7 @@ const BACKEND_URL = 'http://localhost:3333';
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff
 const MAX_SAFETY_RETRIES = 50; // Maximum retries for safety filter errors
+const VIDEO_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes timeout for video generation
 
 // ===== Internationalization =====
 const i18n = {
@@ -1816,9 +1817,11 @@ async function generateVideo() {
     };
     
     if (imageUrl) {
+        // Encode image URL properly for API
         params.image = imageUrl;
     }
     
+    Logger.info('Video params', { model, hasImage: !!imageUrl, duration: params.duration });
     showLoading('videoLoading', true);
     hidePreview('video');
     
@@ -1826,7 +1829,8 @@ async function generateVideo() {
         const url = buildImageUrl(prompt, params);
         Logger.debug('Video URL built', { url: url.slice(0, 200) });
         
-        const response = await fetchWithRetry(url);
+        // Use longer timeout for video generation
+        const response = await fetchVideoWithTimeout(url);
         
         const blob = await response.blob();
         const videoUrl = URL.createObjectURL(blob);
@@ -2681,6 +2685,67 @@ async function fetchWithRetry(url, options = {}, maxRetries = MAX_RETRIES) {
     
     Logger.error('All retry attempts failed', { url, error: lastError?.message });
     throw lastError || new Error('Request failed after all retries');
+}
+
+/**
+ * Fetch video with extended timeout (videos can take several minutes to generate)
+ * Uses AbortController for proper timeout handling
+ * @param {string} url - URL to fetch
+ */
+async function fetchVideoWithTimeout(url) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+        Logger.warn('Video request timed out after 5 minutes');
+    }, VIDEO_TIMEOUT_MS);
+    
+    try {
+        const currentKey = credentialManager.getCurrent();
+        const options = {
+            signal: controller.signal,
+            headers: {}
+        };
+        
+        if (currentKey) {
+            options.headers['Authorization'] = `Bearer ${currentKey}`;
+        }
+        
+        Logger.info('Starting video fetch (this may take several minutes)...', { url: url.slice(0, 200) });
+        
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            // Handle specific error codes
+            if (response.status === 401) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                const authError = new Error(`AUTH_ERROR: ${errorText}`);
+                authError.isAuthError = true;
+                throw authError;
+            } else if (response.status === 403) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                if (errorText.includes('FORBIDDEN') || errorText.includes('balance') || errorText.includes('Insufficient') || errorText.includes('pollen')) {
+                    const balanceError = new Error(`BALANCE_ERROR: ${errorText}`);
+                    balanceError.isBalanceError = true;
+                    throw balanceError;
+                }
+                throw new Error(`HTTP 403: ${errorText}`);
+            }
+            
+            const errorText = await response.text().catch(() => 'Unknown error');
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        Logger.info('Video fetch successful', { status: response.status });
+        return response;
+        
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Video generation timed out. Try a shorter duration or simpler prompt.');
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 /**
