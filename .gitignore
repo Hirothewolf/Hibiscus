@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Gallery content (created automatically by the app)
+app/gallery/images/*
+app/gallery/videos/*
+app/gallery/index.json
+
+# Keep gallery folder structure
+!app/gallery/images/.gitkeep
+!app/gallery/videos/.gitkeep
+
+# Build outputs
+dist/
+build/
+*.exe
+*.AppImage
+*.deb
+*.dmg
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temp files
+*.tmp
+*.temp

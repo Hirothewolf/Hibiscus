@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibiscus 🌺</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- First Run / Language & API Modal -->
+    <div class="modal hidden" id="setupModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content setup-modal">
+            <div class="setup-header">
+                <span class="setup-icon">🌺</span>
+                <h2 data-i18n="setup.title">Bem-vindo ao Hibiscus</h2>
+                <p class="setup-subtitle" data-i18n="setup.welcome">Configure seu idioma e API para começar</p>
+            </div>
+            <div class="setup-form">
+                <div class="form-group">
+                    <label data-i18n="setup.language">Idioma / Language / Idioma</label>
+                    <select id="setupLanguage">
+                        <option value="pt">🇧🇷 Português</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="setup.apiKey">Chave de API</label>
+                    <input type="password" id="setupApiKey" placeholder="pk_... ou sk_...">
+                    <small data-i18n="setup.apiKeyHint">Para maiores limites, obtenha em <a href="https://enter.pollinations.ai" target="_blank">enter.pollinations.ai</a></small>
+                </div>
+                <button class="btn-primary" id="setupConfirmBtn">
+                    <span class="btn-icon">✨</span>
+                    <span data-i18n="setup.start">Começar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🌺</span>
+                <h1>Hibiscus</h1>
+            </div>
+            
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="image-gen">
+                    <span class="tab-icon">🖼️</span>
+                    <span data-i18n="nav.generateImage">Gerar Imagem</span>
+                </button>
+                <button class="nav-tab" data-tab="image-edit">
+                    <span class="tab-icon">✏️</span>
+                    <span data-i18n="nav.editImage">Editar Imagem</span>
+                </button>
+                <button class="nav-tab" data-tab="video-gen">
+                    <span class="tab-icon">🎬</span>
+                    <span data-i18n="nav.generateVideo">Gerar Vídeo</span>
+                </button>
+                <button class="nav-tab" data-tab="gallery">
+                    <span class="tab-icon">📁</span>
+                    <span data-i18n="nav.gallery">Galeria</span>
+                </button>
+                <button class="nav-tab" data-tab="settings">
+                    <span class="tab-icon">⚙️</span>
+                    <span data-i18n="nav.settings">Configurações</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="auto-download-status">
+                    <span class="status-dot" id="autoDownloadDot"></span>
+                    <span id="autoDownloadText">Auto-download: OFF</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Image Generation Tab -->
+            <section class="tab-content active" id="image-gen">
+                <div class="content-header">
+                    <h2 data-i18n="image.title">Geração de Imagens</h2>
+                    <p data-i18n="image.subtitle">Crie imagens incríveis com IA</p>
+                </div>
+
+                <div class="generation-layout">
+                    <div class="controls-panel">
+                        <div class="form-group">
+                            <label for="imagePrompt" data-i18n="image.prompt">Prompt</label>
+                            <textarea id="imagePrompt" data-i18n-placeholder="image.promptPlaceholder" placeholder="Descreva a imagem que você quer criar..." rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imageNegativePrompt" data-i18n="image.negativePrompt">Prompt Negativo</label>
+                            <input type="text" id="imageNegativePrompt" data-i18n-placeholder="image.negativePromptPlaceholder" placeholder="O que evitar na imagem..." value="worst quality, blurry">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="imageModel" data-i18n="image.model">Modelo</label>
+                                <select id="imageModel">
+                                    <option value="flux">Flux (Padrão)</option>
+                                    <option value="zimage">Z-Image</option>
+                                    <option value="turbo">Turbo (Rápido)</option>
+                                    <option value="gptimage">GPT Image</option>
+                                    <option value="gptimage-large">GPT Image Large</option>
+                                    <option value="kontext">Kontext</option>
+                                    <option value="seedream">Seedream</option>
+                                    <option value="seedream-pro">Seedream Pro</option>
+                                    <option value="nanobanana">Nanobanana</option>
+                                    <option value="nanobanana-pro">Nanobanana Pro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="imageQuality" data-i18n="image.quality">Qualidade</label>
+                                <select id="imageQuality">
+                                    <option value="low" data-i18n="image.qualityLow">Baixa</option>
+                                    <option value="medium" selected data-i18n="image.qualityMedium">Média</option>
+                                    <option value="high" data-i18n="image.qualityHigh">Alta</option>
+                                    <option value="hd">HD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label data-i18n="image.aspectRatio">Proporção</label>
+                            <div class="aspect-ratio-buttons" id="imageAspectRatios">
+                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024" data-h="1024">1:1</button>
+                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344" data-h="768">16:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768" data-h="1344">9:16</button>
+                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536" data-h="640">21:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832" data-h="1216">2:3</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="imageWidth" data-i18n="image.width">Largura</label>
+                                <input type="number" id="imageWidth" value="1024" min="256" max="2048" step="64">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="imageHeight" data-i18n="image.height">Altura</label>
+                                <input type="number" id="imageHeight" value="1024" min="256" max="2048" step="64">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="imageSeed" data-i18n="image.seed">Seed</label>
+                                <input type="number" id="imageSeed" value="-1" min="-1">
+                                <small data-i18n="image.seedRandom">-1 para aleatório</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="imageGuidance" data-i18n="image.guidance">Guidance Scale</label>
+                                <input type="number" id="imageGuidance" value="7.5" min="1" max="20" step="0.5">
+                            </div>
+                        </div>
+
+                        <div class="form-row checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="imageEnhance">
+                                <span data-i18n="image.enhance">Melhorar prompt com IA</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="imageTransparent">
+                                <span data-i18n="image.transparent">Fundo transparente</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="imageNoLogo">
+                                <span data-i18n="image.noLogo">Sem marca d'água</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="imageSafe">
+                                <span data-i18n="image.safeFilter">Filtro de segurança</span>
+                            </label>
+                        </div>
+
+                        <button class="btn-primary btn-generate" id="generateImageBtn">
+                            <span class="btn-icon">✨</span>
+                            <span data-i18n="image.generate">Gerar Imagem</span>
+                        </button>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="preview-container" id="imagePreviewContainer">
+                            <div class="preview-placeholder">
+                                <span class="placeholder-icon">🖼️</span>
+                                <p data-i18n="image.placeholder">Sua imagem aparecerá aqui</p>
+                            </div>
+                            <img id="imagePreview" class="preview-image hidden" alt="Generated image">
+                            <div class="loading-overlay hidden" id="imageLoading">
+                                <div class="spinner"></div>
+                                <p data-i18n="image.generating">Gerando imagem...</p>
+                            </div>
+                        </div>
+                        <div class="preview-actions hidden" id="imageActions">
+                            <button class="btn-secondary" id="downloadImageBtn">
+                                <span>📥</span> <span data-i18n="btn.download">Download</span>
+                            </button>
+                            <button class="btn-secondary" id="editImageBtn">
+                                <span>✏️</span> <span data-i18n="btn.edit">Editar</span>
+                            </button>
+                            <button class="btn-secondary" id="regenerateImageBtn">
+                                <span>🔄</span> <span data-i18n="btn.regenerate">Regenerar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Editing Tab -->
+            <section class="tab-content" id="image-edit">
+                <div class="content-header">
+                    <h2 data-i18n="edit.title">Edição de Imagens</h2>
+                    <p data-i18n="edit.subtitle">Modifique imagens existentes com IA (suporta múltiplas imagens)</p>
+                </div>
+
+                <div class="generation-layout">
+                    <div class="controls-panel">
+                        <div class="form-group">
+                            <label data-i18n="edit.refImages">Imagens de Referência (suporta múltiplas)</label>
+                            <div class="image-upload-area" id="editImageUpload">
+                                <input type="file" id="editImageFile" accept="image/*" hidden>
+                                <input type="text" id="editImageUrl" data-i18n-placeholder="edit.urlPlaceholder" placeholder="Cole URL e pressione Enter, ou faça upload">
+                                <button class="btn-upload" id="editUploadBtn">📤 <span data-i18n="btn.upload">Upload</span></button>
+                            </div>
+                            <small class="form-hint" data-i18n="edit.hint">Você pode adicionar várias imagens. URLs são processadas mais rápido.</small>
+                            <div class="uploaded-preview hidden" id="editUploadedPreview">
+                                <img id="editSourceImage" alt="Source image">
+                                <button class="btn-remove" id="removeEditImage" data-i18n="edit.clearAll">✕ Limpar Todas</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editPrompt" data-i18n="edit.promptLabel">Prompt de Edição</label>
+                            <textarea id="editPrompt" data-i18n-placeholder="edit.promptPlaceholder" placeholder="Descreva as modificações que você quer fazer..." rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editModel" data-i18n="image.model">Modelo</label>
+                            <select id="editModel">
+                                <option value="kontext">Kontext (Edição)</option>
+                                <option value="gptimage">GPT Image</option>
+                                <option value="flux">Flux</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label data-i18n="image.aspectRatio">Proporção</label>
+                            <div class="aspect-ratio-buttons" id="editAspectRatios">
+                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024" data-h="1024">1:1</button>
+                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344" data-h="768">16:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768" data-h="1344">9:16</button>
+                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536" data-h="640">21:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832" data-h="1216">2:3</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editWidth" data-i18n="image.width">Largura</label>
+                                <input type="number" id="editWidth" value="1024" min="256" max="2048" step="64">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editHeight" data-i18n="image.height">Altura</label>
+                                <input type="number" id="editHeight" value="1024" min="256" max="2048" step="64">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editSeed" data-i18n="image.seed">Seed</label>
+                                <input type="number" id="editSeed" value="-1" min="-1">
+                                <small data-i18n="image.seedRandom">-1 para aleatório</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editGuidance" data-i18n="image.guidance">Guidance Scale</label>
+                                <input type="number" id="editGuidance" value="7.5" min="1" max="20" step="0.5">
+                            </div>
+                        </div>
+
+                        <div class="form-row checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editEnhance">
+                                <span data-i18n="image.enhance">Melhorar prompt com IA</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editTransparent">
+                                <span data-i18n="image.transparent">Fundo transparente</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editNoLogo">
+                                <span data-i18n="image.noLogo">Sem marca d'água</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="editSafe">
+                                <span data-i18n="image.safeFilter">Filtro de segurança</span>
+                            </label>
+                        </div>
+
+                        <button class="btn-primary btn-generate" id="editImageGenerateBtn">
+                            <span class="btn-icon">✨</span>
+                            <span data-i18n="edit.apply">Aplicar Edição</span>
+                        </button>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="preview-container" id="editPreviewContainer">
+                            <div class="preview-placeholder">
+                                <span class="placeholder-icon">✏️</span>
+                                <p data-i18n="edit.placeholder">O resultado da edição aparecerá aqui</p>
+                            </div>
+                            <img id="editPreview" class="preview-image hidden" alt="Edited image">
+                            <div class="loading-overlay hidden" id="editLoading">
+                                <div class="spinner"></div>
+                                <p data-i18n="edit.applying">Aplicando edição...</p>
+                            </div>
+                        </div>
+                        <div class="preview-actions hidden" id="editActions">
+                            <button class="btn-secondary" id="downloadEditBtn">
+                                <span>📥</span> <span data-i18n="btn.download">Download</span>
+                            </button>
+                            <button class="btn-secondary" id="continueEditBtn">
+                                <span>✏️</span> <span data-i18n="edit.continue">Continuar Editando</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Video Generation Tab -->
+            <section class="tab-content" id="video-gen">
+                <div class="content-header">
+                    <h2 data-i18n="video.title">Geração de Vídeos</h2>
+                    <p data-i18n="video.subtitle">Crie vídeos incríveis com IA</p>
+                </div>
+
+                <div class="generation-layout">
+                    <div class="controls-panel">
+                        <div class="form-group">
+                            <label for="videoPrompt" data-i18n="video.prompt">Prompt</label>
+                            <textarea id="videoPrompt" data-i18n-placeholder="video.promptPlaceholder" placeholder="Descreva o vídeo que você quer criar..." rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="videoModel" data-i18n="video.model">Modelo</label>
+                            <select id="videoModel">
+                                <option value="veo">Veo (Text-to-Video)</option>
+                                <option value="seedance">Seedance (Text/Image-to-Video)</option>
+                                <option value="seedance-pro">Seedance Pro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="videoImageGroup">
+                            <label data-i18n="video.refImage">Imagem de Referência (Opcional)</label>
+                            <div class="image-upload-area" id="videoImageUpload">
+                                <input type="file" id="videoImageFile" accept="image/*" hidden>
+                                <input type="text" id="videoImageUrl" data-i18n-placeholder="video.refImagePlaceholder" placeholder="URL da imagem inicial (para Seedance)">
+                                <button class="btn-upload" id="videoUploadBtn">📤 <span data-i18n="btn.upload">Upload</span></button>
+                            </div>
+                            <div class="uploaded-preview hidden" id="videoUploadedPreview">
+                                <img id="videoSourceImage" alt="Source image">
+                                <button class="btn-remove" id="removeVideoImage">✕</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="videoDuration" data-i18n="video.duration">Duração (segundos)</label>
+                                <select id="videoDuration">
+                                    <option value="4">4 segundos</option>
+                                    <option value="6">6 segundos</option>
+                                    <option value="8" selected>8 segundos</option>
+                                    <option value="10">10 segundos</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="videoAspectRatio" data-i18n="video.aspectRatio">Proporção</label>
+                                <select id="videoAspectRatio">
+                                    <option value="16:9">16:9 (<span data-i18n="video.landscape">Paisagem</span>)</option>
+                                    <option value="9:16">9:16 (<span data-i18n="video.portrait">Retrato</span>)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="videoSeed" data-i18n="image.seed">Seed</label>
+                                <input type="number" id="videoSeed" value="-1" min="-1">
+                                <small data-i18n="image.seedRandom">-1 para aleatório</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="videoAudio">
+                                <span data-i18n="video.audio">Gerar áudio (apenas Veo)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="videoEnhance">
+                                <span data-i18n="video.enhance">Melhorar prompt com IA</span>
+                            </label>
+                        </div>
+
+                        <button class="btn-primary btn-generate" id="generateVideoBtn">
+                            <span class="btn-icon">🎬</span>
+                            <span data-i18n="video.generate">Gerar Vídeo</span>
+                        </button>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="preview-container video-preview-container" id="videoPreviewContainer">
+                            <div class="preview-placeholder">
+                                <span class="placeholder-icon">🎬</span>
+                                <p data-i18n="video.placeholder">Seu vídeo aparecerá aqui</p>
+                                <small data-i18n="video.placeholderHint">Vídeos podem levar alguns minutos para gerar</small>
+                            </div>
+                            <video id="videoPreview" class="preview-video hidden" controls></video>
+                            <div class="loading-overlay hidden" id="videoLoading">
+                                <div class="spinner"></div>
+                                <p data-i18n="video.generating">Gerando vídeo...</p>
+                                <small data-i18n="video.generatingHint">Isso pode levar alguns minutos</small>
+                            </div>
+                        </div>
+                        <div class="preview-actions hidden" id="videoActions">
+                            <button class="btn-secondary" id="downloadVideoBtn">
+                                <span>📥</span> <span data-i18n="btn.download">Download</span>
+                            </button>
+                            <button class="btn-secondary" id="regenerateVideoBtn">
+                                <span>🔄</span> <span data-i18n="btn.regenerate">Regenerar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gallery Tab -->
+            <section class="tab-content" id="gallery">
+                <div class="content-header">
+                    <h2 data-i18n="gallery.title">Galeria</h2>
+                    <p data-i18n="gallery.subtitle">Suas criações organizadas por data</p>
+                </div>
+
+                <div class="gallery-controls">
+                    <div class="gallery-filters">
+                        <button class="filter-btn active" data-filter="all" data-i18n="gallery.all">Todos</button>
+                        <button class="filter-btn" data-filter="image" data-i18n="gallery.images">Imagens</button>
+                        <button class="filter-btn" data-filter="video" data-i18n="gallery.videos">Vídeos</button>
+                    </div>
+                    <div class="gallery-actions">
+                        <button class="btn-secondary" id="downloadAllBtn">
+                            <span>📥</span> <span data-i18n="gallery.downloadAll">Download Todos</span>
+                        </button>
+                        <button class="btn-secondary" id="clearGalleryBtn">
+                            <span>🗑️</span> <span data-i18n="gallery.clear">Limpar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="gallery-container" id="galleryContainer">
+                    <!-- Gallery items will be populated by JavaScript -->
+                    <div class="gallery-empty">
+                        <span class="empty-icon">📁</span>
+                        <p data-i18n="gallery.empty">Nenhuma criação ainda</p>
+                        <small data-i18n="gallery.emptyHint">Gere imagens ou vídeos para vê-los aqui</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section class="tab-content" id="settings">
+                <div class="content-header">
+                    <h2 data-i18n="settings.title">Configurações</h2>
+                    <p data-i18n="settings.subtitle">Configure sua experiência</p>
+                </div>
+
+                <div class="settings-container settings-grid-layout">
+                    <!-- Left Column -->
+                    <div class="settings-column">
+                        <div class="settings-section">
+                            <h3>🔑 API Key</h3>
+                            <div class="form-group">
+                                <label for="apiKey" data-i18n="settings.apiKey">Chave de API</label>
+                                <input type="password" id="apiKey" placeholder="pk_... ou sk_...">
+                                <small><span data-i18n="settings.apiKeyHint">Obtenha sua chave em</span> <a href="https://enter.pollinations.ai" target="_blank">enter.pollinations.ai</a></small>
+                            </div>
+                            <button class="btn-secondary" id="saveApiKey" data-i18n="settings.saveKey">Salvar Chave</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>📥 <span data-i18n="settings.autoDownload">Auto-Download</span></h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="autoDownloadEnabled">
+                                    <span data-i18n="settings.autoDownloadEnable">Ativar download automático</span>
+                                </label>
+                                <small data-i18n="settings.autoDownloadHint">Baixa automaticamente todas as criações</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="filenameFormat" data-i18n="settings.filenameFormat">Formato do Nome</label>
+                                <select id="filenameFormat">
+                                    <option value="prompt" data-i18n="settings.filenamePrompt">Prompt resumido</option>
+                                    <option value="timestamp" data-i18n="settings.filenameTimestamp">Timestamp</option>
+                                    <option value="both" selected data-i18n="settings.filenameBoth">Prompt + Timestamp</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>🌐 <span data-i18n="settings.language">Idioma</span> / Language</h3>
+                            <div class="form-group">
+                                <label for="language" data-i18n="settings.language">Idioma</label>
+                                <select id="language">
+                                    <option value="pt">🇧🇷 Português</option>
+                                    <option value="en">🇺🇸 English</option>
+                                    <option value="es">🇪🇸 Español</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>🎨 Interface</h3>
+                            <div class="form-group">
+                                <label for="theme" data-i18n="settings.theme">Tema</label>
+                                <select id="theme">
+                                    <option value="dark" selected data-i18n="settings.themeDark">Escuro</option>
+                                    <option value="light" data-i18n="settings.themeLight">Claro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="settings-column">
+                        <div class="settings-section">
+                            <h3>📊 <span data-i18n="settings.stats">Estatísticas</span></h3>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-value" id="totalImages">0</span>
+                                    <span class="stat-label" data-i18n="settings.imagesGenerated">Imagens Geradas</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value" id="totalVideos">0</span>
+                                    <span class="stat-label" data-i18n="settings.videosGenerated">Vídeos Gerados</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value" id="totalDownloads">0</span>
+                                    <span class="stat-label" data-i18n="settings.downloads">Downloads</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-logs-section">
+                            <h3>🪵 <span data-i18n="settings.logs">Logs de Sistema</span></h3>
+                            <div class="logs-actions">
+                                <button class="btn-secondary" id="refreshLogsBtn">
+                                    <span>🔄</span> <span data-i18n="settings.logsRefresh">Atualizar</span>
+                                </button>
+                                <button class="btn-secondary" id="exportLogsBtn">
+                                    <span>📥</span> <span data-i18n="settings.logsExport">Exportar</span>
+                                </button>
+                                <button class="btn-secondary" id="clearLogsBtn">
+                                    <span>🗑️</span> <span data-i18n="settings.logsClear">Limpar</span>
+                                </button>
+                            </div>
+                            <div class="logs-container" id="logsContainer">
+                                <p class="logs-empty" data-i18n="settings.logsEmpty">Nenhum log registrado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal for Gallery Preview -->
+    <div class="modal hidden" id="galleryModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">✕</button>
+            <div class="modal-media">
+                <img id="modalImage" class="hidden" alt="Preview">
+                <video id="modalVideo" class="hidden" controls></video>
+            </div>
+            <div class="modal-info">
+                <p class="modal-prompt" id="modalPrompt"></p>
+                <p class="modal-date" id="modalDate"></p>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="modalEdit">✏️ <span data-i18n="btn.edit">Editar</span></button>
+                    <button class="btn-secondary" id="modalDownload">📥 <span data-i18n="btn.download">Download</span></button>
+                    <button class="btn-secondary" id="modalDelete">🗑️ <span data-i18n="btn.delete">Excluir</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <span data-i18n="footer.madeWith">Feito com</span> 🤍 <span data-i18n="footer.by">por</span> <a href="https://github.com/Hirothewolf" target="_blank" rel="noopener noreferrer">Hirothewolf</a>
+        <span class="footer-separator">•</span>
+        <span data-i18n="footer.poweredBy">Powered by</span> <a href="https://pollinations.ai/" target="_blank" rel="noopener noreferrer" class="pollinations-link">🐝 Pollinations.ai</a>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

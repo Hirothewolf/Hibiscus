@@ -1,0 +1,84 @@
+{
+  "name": "hibiscus",
+  "version": "1.0.0",
+  "description": "AI Image & Video Generation Studio powered by Pollinations.ai",
+  "main": "main.js",
+  "scripts": {
+    "start": "node app/server.js",
+    "start:electron": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac"
+  },
+  "author": "Hibiscus",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "image-generation",
+    "video-generation",
+    "pollinations",
+    "art",
+    "creative",
+    "hibiscus"
+  ],
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.hibiscus.studio",
+    "productName": "Hibiscus",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "app/gallery",
+        "to": "gallery",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "app/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "app/icon.ico",
+      "uninstallerIcon": "app/icon.ico",
+      "installerHeaderIcon": "app/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Hibiscus"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "app/icon.png",
+      "category": "Graphics"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "app/icon.icns",
+      "category": "public.app-category.graphics-design"
+    }
+  }
+}
