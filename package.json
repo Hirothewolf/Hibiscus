@@ -80,5 +80,8 @@
       "icon": "app/icon.icns",
       "category": "public.app-category.graphics-design"
     }
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

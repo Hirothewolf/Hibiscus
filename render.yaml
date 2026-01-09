@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: hibiscus
+    env: node
+    buildCommand: npm install
+    startCommand: node app/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3333
