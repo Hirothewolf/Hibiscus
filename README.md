@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://image.pollinations.ai/prompt/Hibiscus%20flower%20logo%2C%20pink%20gradient%2C%20minimal%20modern%20design%2C%20digital%20art%2C%20centered%2C%20clean%20background?width=200&height=200&nologo=true" alt="Hibiscus Logo" width="150"/>
-</p>
-
 <h1 align="center">🌺 Hibiscus</h1>
 
 <p align="center">
@@ -17,7 +13,11 @@
 </p>
 
 <p align="center">
-  <img src="https://image.pollinations.ai/prompt/Screenshot%20of%20a%20modern%20dark%20themed%20AI%20art%20studio%20web%20app%20called%20Hibiscus%2C%20showing%20image%20generation%20interface%20with%20pink%20accent%20colors%2C%20gallery%20view%2C%20professional%20UI?width=800&height=450&nologo=true" alt="Hibiscus Screenshot" width="100%"/>
+  <img src="Hibiscus1.png" alt="Hibiscus Screenshot" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="Hibiscus2.png" alt="Hibiscus Screenshot 2" width="100%"/>
 </p>
 
 ---
