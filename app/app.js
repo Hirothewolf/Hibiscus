@@ -155,6 +155,9 @@ const i18n = {
             'toast.imageError': 'Erro ao gerar imagem: {error}',
             'toast.editError': 'Erro ao editar imagem: {error}',
             'toast.videoError': 'Erro ao gerar vídeo: {error}',
+            'toast.imageTooLarge': 'Imagem muito grande. Use uma imagem menor ou forneça uma URL.',
+            'toast.uploadingImage': 'Enviando imagem...',
+            'toast.imageUploadFailed': 'Falha ao enviar imagem. Use uma URL externa.',
             'toast.enterEditPrompt': 'Digite um prompt para a edição',
             'toast.enterVideoPrompt': 'Digite um prompt para gerar o vídeo',
             'toast.nothingToDownload': 'Nenhum item para baixar',
@@ -321,6 +324,9 @@ const i18n = {
             'toast.imageError': 'Error generating image: {error}',
             'toast.editError': 'Error editing image: {error}',
             'toast.videoError': 'Error generating video: {error}',
+            'toast.imageTooLarge': 'Image too large. Use a smaller image or provide a URL.',
+            'toast.uploadingImage': 'Uploading image...',
+            'toast.imageUploadFailed': 'Failed to upload image. Use an external URL.',
             'toast.enterEditPrompt': 'Enter a prompt for the edit',
             'toast.enterVideoPrompt': 'Enter a prompt to generate the video',
             'toast.nothingToDownload': 'Nothing to download',
@@ -487,6 +493,9 @@ const i18n = {
             'toast.imageError': 'Error al generar imagen: {error}',
             'toast.editError': 'Error al editar imagen: {error}',
             'toast.videoError': 'Error al generar video: {error}',
+            'toast.imageTooLarge': 'Imagen muy grande. Usa una imagen más pequeña o proporciona una URL.',
+            'toast.uploadingImage': 'Subiendo imagen...',
+            'toast.imageUploadFailed': 'Error al subir imagen. Usa una URL externa.',
             'toast.enterEditPrompt': 'Ingresa un prompt para la edición',
             'toast.enterVideoPrompt': 'Ingresa un prompt para generar el video',
             'toast.nothingToDownload': 'Nada para descargar',
@@ -1746,7 +1755,8 @@ function setupVideoGeneration() {
     removeBtn.addEventListener('click', () => {
         document.getElementById('videoUploadedPreview').classList.add('hidden');
         document.getElementById('videoImageUrl').value = '';
-        state.videoSourceUrl = null;
+        state.videoSourceFile = null;
+        state.videoSourceDataUrl = null;
     });
     
     generateBtn.addEventListener('click', generateVideo);
@@ -1760,13 +1770,52 @@ function setupVideoGeneration() {
 function handleVideoImageUpload(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-        const url = e.target.result;
-        document.getElementById('videoImageUrl').value = url;
-        document.getElementById('videoSourceImage').src = url;
+        const dataUrl = e.target.result;
+        document.getElementById('videoSourceImage').src = dataUrl;
         document.getElementById('videoUploadedPreview').classList.remove('hidden');
-        state.videoSourceUrl = url;
+        // Store the file for later upload, not the data URL
+        state.videoSourceFile = file;
+        state.videoSourceDataUrl = dataUrl;
+        // Clear the URL input - we'll upload when generating
+        document.getElementById('videoImageUrl').value = '';
     };
     reader.readAsDataURL(file);
+}
+
+/**
+ * Upload image to a free hosting service (imgbb) for video generation
+ * Returns a public URL that Pollinations can access
+ */
+async function uploadImageForVideo(file) {
+    Logger.info('Uploading image to imgbb...');
+    showToast(i18n.t('toast.uploadingImage'), 'info');
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        // Using imgbb free API (no key needed for anonymous uploads)
+        const response = await fetch('https://api.imgbb.com/1/upload?key=d36eb6591370ae7f9089d85875e56b22', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.success && data.data && data.data.url) {
+            Logger.info('Image uploaded successfully', { url: data.data.url });
+            return data.data.url;
+        } else {
+            throw new Error('Upload response invalid');
+        }
+    } catch (error) {
+        Logger.error('Image upload failed', { error: error.message });
+        showToast(i18n.t('toast.imageUploadFailed'), 'error');
+        throw error;
+    }
 }
 
 function updateVideoDurationOptions() {
@@ -1806,7 +1855,7 @@ async function generateVideo() {
     Logger.info('Starting video generation', { prompt: prompt.slice(0, 100) });
     
     const model = document.getElementById('videoModel').value;
-    const imageUrl = document.getElementById('videoImageUrl').value.trim();
+    let imageUrl = document.getElementById('videoImageUrl').value.trim();
     
     const params = {
         model: model,
@@ -1819,12 +1868,34 @@ async function generateVideo() {
         nofeed: true
     };
     
+    // If user uploaded a local file, upload it to imgbb first
+    if (state.videoSourceFile && !imageUrl) {
+        try {
+            showLoading('videoLoading', true);
+            imageUrl = await uploadImageForVideo(state.videoSourceFile);
+            Logger.info('Using uploaded image URL', { url: imageUrl });
+        } catch (error) {
+            showLoading('videoLoading', false);
+            return; // Error already shown by uploadImageForVideo
+        }
+    }
+    
     if (imageUrl) {
-        // Encode image URL properly for API
+        // Check if it's still a data URL (shouldn't happen now, but just in case)
+        if (imageUrl.startsWith('data:')) {
+            Logger.error('Data URL detected - this should have been uploaded first');
+            showToast(i18n.t('toast.imageTooLarge'), 'error');
+            return;
+        }
         params.image = imageUrl;
     }
     
-    Logger.info('Video params', { model, hasImage: !!imageUrl, duration: params.duration });
+    Logger.info('Video params', { 
+        model, 
+        hasImage: !!imageUrl, 
+        imageUrl: imageUrl ? imageUrl.slice(0, 100) : 'none',
+        duration: params.duration 
+    });
     showLoading('videoLoading', true);
     hidePreview('video');
     
