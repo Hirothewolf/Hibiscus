@@ -19,11 +19,15 @@
 </p>
 
 <p align="center">
-  <img src="Hibiscus1.png" alt="Hibiscus Screenshot" width="100%"/>
+  <img src="Hibiscus1.png" alt="Hibiscus - Image Generation" width="100%"/>
 </p>
 
 <p align="center">
-  <img src="Hibiscus2.png" alt="Hibiscus Screenshot 2" width="100%"/>
+  <img src="Hibiscus2.png" alt="Hibiscus - Gallery" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="Hibiscus3.png" alt="Hibiscus - Video Generation" width="100%"/>
 </p>
 
 ---

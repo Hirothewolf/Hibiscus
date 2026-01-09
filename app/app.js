@@ -1794,11 +1794,14 @@ function updateVideoDurationOptions() {
 }
 
 async function generateVideo() {
-    const prompt = document.getElementById('videoPrompt').value.trim();
+    let prompt = document.getElementById('videoPrompt').value.trim();
     if (!prompt) {
         showToast(i18n.t('toast.enterVideoPrompt'), 'warning');
         return;
     }
+    
+    // Clean prompt: replace newlines with spaces to avoid URL issues
+    prompt = prompt.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
     
     Logger.info('Starting video generation', { prompt: prompt.slice(0, 100) });
     
@@ -2742,6 +2745,12 @@ async function fetchVideoWithTimeout(url) {
         if (error.name === 'AbortError') {
             throw new Error('Video generation timed out. Try a shorter duration or simpler prompt.');
         }
+        // Log more details about network errors
+        Logger.error('Video fetch error details', { 
+            name: error.name, 
+            message: error.message,
+            stack: error.stack?.slice(0, 300)
+        });
         throw error;
     } finally {
         clearTimeout(timeoutId);
