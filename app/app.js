@@ -1783,33 +1783,30 @@ function handleVideoImageUpload(file) {
 }
 
 /**
- * Upload image to a free hosting service (imgbb) for video generation
- * Returns a public URL that Pollinations can access
+ * Upload image for video generation using the same method as img2img
+ * Converts file to base64 and uses uploadImagesToTempHost
  */
 async function uploadImageForVideo(file) {
-    Logger.info('Uploading image to imgbb...');
+    Logger.info('Uploading image for video generation...');
     showToast(i18n.t('toast.uploadingImage'), 'info');
     
-    const formData = new FormData();
-    formData.append('image', file);
-    
     try {
-        // Using imgbb free API (no key needed for anonymous uploads)
-        const response = await fetch('https://api.imgbb.com/1/upload?key=d36eb6591370ae7f9089d85875e56b22', {
-            method: 'POST',
-            body: formData
+        // Convert file to base64 data URL
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
         });
         
-        if (!response.ok) {
-            throw new Error(`Upload failed: ${response.status}`);
-        }
+        // Use the same upload method as img2img
+        const uploadedUrls = await uploadImagesToTempHost([base64]);
         
-        const data = await response.json();
-        if (data.success && data.data && data.data.url) {
-            Logger.info('Image uploaded successfully', { url: data.data.url });
-            return data.data.url;
+        if (uploadedUrls.length > 0 && uploadedUrls[0].startsWith('http')) {
+            Logger.info('Image uploaded successfully for video', { url: uploadedUrls[0] });
+            return uploadedUrls[0];
         } else {
-            throw new Error('Upload response invalid');
+            throw new Error('Upload failed - no valid URL returned');
         }
     } catch (error) {
         Logger.error('Image upload failed', { error: error.message });
