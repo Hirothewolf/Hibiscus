@@ -1397,8 +1397,16 @@ function buildImageUrl(prompt, params) {
     const encodedPrompt = encodeURIComponent(prompt);
     const url = new URL(`${API_BASE}/image/${encodedPrompt}`);
     
+    // Parameters that must be integers
+    const integerParams = ['width', 'height', 'seed', 'duration'];
+    
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
+            // Ensure integer params are sent as integers (not floats)
+            if (integerParams.includes(key)) {
+                value = Math.floor(parseInt(value, 10));
+                if (isNaN(value)) return; // Skip if not a valid number
+            }
             url.searchParams.set(key, value.toString());
         }
     });
