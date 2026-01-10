@@ -1400,8 +1400,16 @@ function buildImageUrl(prompt, params) {
     // Parameters that must be integers
     const integerParams = ['width', 'height', 'seed', 'duration'];
     
+    // Extract image param to add last (API requirement)
+    let imageParam = null;
+    
     Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
+            // Save image param for last
+            if (key === 'image') {
+                imageParam = value;
+                return;
+            }
             // Ensure integer params are sent as integers (not floats)
             if (integerParams.includes(key)) {
                 value = Math.floor(parseInt(value, 10));
@@ -1410,6 +1418,13 @@ function buildImageUrl(prompt, params) {
             url.searchParams.set(key, value.toString());
         }
     });
+    
+    // Add image param last and properly encoded (API requirement)
+    if (imageParam) {
+        // Manually append to ensure it's last and properly encoded
+        const separator = url.search ? '&' : '?';
+        return url.toString() + separator + 'image=' + encodeURIComponent(imageParam);
+    }
     
     return url.toString();
 }
