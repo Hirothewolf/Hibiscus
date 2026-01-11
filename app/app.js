@@ -667,7 +667,14 @@ const Logger = {
             this.logs = this.logs.slice(0, this.maxLogs);
         }
         
-        localStorage.setItem('appLogs', JSON.stringify(this.logs));
+        // Save immediately for important events
+        try {
+            localStorage.setItem('appLogs', JSON.stringify(this.logs));
+        } catch (e) {
+            // localStorage might be full, trim logs
+            this.logs = this.logs.slice(0, Math.floor(this.maxLogs / 2));
+            localStorage.setItem('appLogs', JSON.stringify(this.logs));
+        }
         
         const consoleMethod = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
         console[consoleMethod](`[${level.toUpperCase()}] ${message}`, data || '');
@@ -680,12 +687,30 @@ const Logger = {
     error(message, data) { return this.log('error', message, data); },
     debug(message, data) { return this.log('debug', message, data); },
     
+    // Specific event loggers for better tracking
+    userAction(action, details = {}) {
+        return this.log('info', `User action: ${action}`, details);
+    },
+    
+    apiRequest(endpoint, params = {}) {
+        return this.log('debug', `API request: ${endpoint}`, params);
+    },
+    
+    apiResponse(endpoint, status, details = {}) {
+        const level = status >= 400 ? 'error' : status >= 300 ? 'warn' : 'info';
+        return this.log(level, `API response: ${endpoint} [${status}]`, details);
+    },
+    
     getLogs(level = null, limit = 100) {
         let filtered = this.logs;
         if (level) {
             filtered = filtered.filter(l => l.level === level);
         }
         return filtered.slice(0, limit);
+    },
+    
+    getErrors(limit = 50) {
+        return this.logs.filter(l => l.level === 'error' || l.level === 'warn').slice(0, limit);
     },
     
     clear() {
@@ -1377,8 +1402,14 @@ async function generateImage() {
         }
         
     } catch (error) {
-        if (!safetyRetryStates.imageLoading.cancelled) {
-            Logger.error('Image generation failed', { error: error.message, prompt: prompt.slice(0, 100) });
+        if (safetyRetryStates.imageLoading.cancelled) {
+            // Already logged in cancelSafetyRetry
+        } else {
+            Logger.error('Image generation failed', { 
+                error: error.message, 
+                errorType: error.isAuthError ? 'auth' : error.isBalanceError ? 'balance' : 'general',
+                prompt: prompt.slice(0, 100) 
+            });
             if (error.isAuthError) {
                 showAuthErrorUI('imageLoading');
             } else if (error.isBalanceError) {
@@ -1728,8 +1759,14 @@ async function applyImageEdit() {
         }
         
     } catch (error) {
-        if (!safetyRetryStates.editLoading.cancelled) {
-            Logger.error('Image edit failed', { error: error.message });
+        if (safetyRetryStates.editLoading.cancelled) {
+            // Already logged in cancelSafetyRetry
+        } else {
+            Logger.error('Image edit failed', { 
+                error: error.message,
+                errorType: error.isAuthError ? 'auth' : error.isBalanceError ? 'balance' : 'general',
+                prompt: prompt.slice(0, 100)
+            });
             if (error.isAuthError) {
                 showAuthErrorUI('editLoading');
             } else if (error.isBalanceError) {
@@ -1966,7 +2003,12 @@ async function generateVideo() {
         showToast(i18n.t('toast.videoSuccess'), 'success');
         
     } catch (error) {
-        Logger.error('Video generation failed', { error: error.message });
+        Logger.error('Video generation failed', { 
+            error: error.message,
+            errorType: error.isAuthError ? 'auth' : error.isBalanceError ? 'balance' : 'general',
+            model: params.model,
+            hasImage: !!params.image
+        });
         if (error.isAuthError) {
             showAuthErrorUI('videoLoading');
         } else if (error.isBalanceError) {
@@ -2997,8 +3039,14 @@ function hideSafetyRetryUI(context) {
 
 function cancelSafetyRetry(context) {
     if (context && safetyRetryStates[context]) {
-        safetyRetryStates[context].cancelled = true;
-        safetyRetryStates[context].active = false;
+        const state = safetyRetryStates[context];
+        Logger.warn('Generation cancelled by user', { 
+            context,
+            attempt: state.currentAttempt,
+            failures: state.failures
+        });
+        state.cancelled = true;
+        state.active = false;
         hideSafetyRetryUI(context);
         showLoading(context, false);
         showToast(i18n.t('toast.safetyCancel'), 'info');
