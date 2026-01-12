@@ -45,11 +45,12 @@ if %NODE_MAJOR% LSS %MIN_NODE_VERSION% (
 echo [OK] Node.js v%NODE_VER% found
 echo.
 
-REM Create gallery directories
+REM Create application directories
 if not exist "%SCRIPT_DIR%app\gallery" mkdir "%SCRIPT_DIR%app\gallery"
 if not exist "%SCRIPT_DIR%app\gallery\images" mkdir "%SCRIPT_DIR%app\gallery\images"
 if not exist "%SCRIPT_DIR%app\gallery\videos" mkdir "%SCRIPT_DIR%app\gallery\videos"
-echo [OK] Gallery directories ready
+if not exist "%SCRIPT_DIR%app\modules" mkdir "%SCRIPT_DIR%app\modules"
+echo [OK] Application directories ready
 
 echo.
 echo    Installation Complete!

@@ -611,9 +611,27 @@ body {
     overflow: hidden;
 }
 
+.gallery-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
 .gallery-item-date {
     font-size: 11px;
     color: var(--text-muted);
+}
+
+.gallery-item-model {
+    font-size: 10px;
+    color: var(--accent-color);
+    background: var(--accent-color-alpha);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .gallery-date-group {

@@ -5,6 +5,7 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Version-1.1.0-ff69b4?style=for-the-badge" alt="Version 1.1.0"/>
   <a href="https://hibiscus-yp9g.onrender.com/">
     <img src="https://img.shields.io/badge/🌺%20Try%20Live%20Demo-hibiscus--yp9g.onrender.com-ff69b4?style=for-the-badge" alt="Live Demo"/>
   </a>
@@ -39,11 +40,13 @@
 | 🎨 **Image Generation** | Create stunning images with Flux, Turbo, GPT-Image, and more |
 | ✏️ **Image Editing** | Transform existing images with AI-powered img2img |
 | 🎬 **Video Generation** | Generate videos with Veo, Seedance models |
-| 📁 **Smart Gallery** | Automatic organization by date with persistence |
+| 📁 **Smart Gallery** | Automatic organization by date with model badges |
 | 💾 **Auto-Download** | Save creations automatically to organized folders |
+| 📂 **Custom Media Dir** | Choose where to save your creations |
 | 🔄 **Smart Retry** | Exponential backoff + safety filter persistence |
 | 🌍 **Multi-Language** | Portuguese, English, and Spanish |
 | 🎭 **Themes** | Dark and Light mode support |
+| 📦 **Modular Code** | Clean architecture with separated modules |
 
 ---
 
@@ -137,6 +140,11 @@ Hibiscus/
 │   ├── styles.css      # Styling  
 │   ├── app.js          # Frontend logic
 │   ├── server.js       # Backend server
+│   ├── modules/        # Modular components (v1.1+)
+│   │   ├── i18n.js     # Internationalization
+│   │   ├── logger.js   # Logging system
+│   │   ├── state.js    # State management
+│   │   └── backend.js  # Backend API client
 │   └── gallery/        # Saved media
 │       ├── images/     # By date (DD-MM-YYYY)
 │       └── videos/     # By date (DD-MM-YYYY)
@@ -169,6 +177,24 @@ Hibiscus/
     <img src="https://img.shields.io/badge/GitHub-Pollinations-181717?style=flat-square&logo=github" alt="GitHub"/>
   </a>
 </p>
+
+---
+
+## 📋 Changelog
+
+### v1.1.0 (January 2026)
+- ✨ **Modular Architecture** - Code split into reusable modules (i18n, logger, state, backend)
+- 🎲 **Random Seed Fix** - Each generation now produces unique results
+- 🏷️ **Model Badges** - Gallery shows which model was used for each creation
+- 📂 **Custom Media Directory** - Choose where to save your files
+- 🖥️ **Electron Desktop App** - Standalone Windows executable
+- 🔧 **Build Scripts** - Easy build process with build.bat
+
+### v1.0.0
+- 🎨 Initial release with image/video generation
+- 🌍 Multi-language support (PT/EN/ES)
+- 📁 Smart gallery with date organization
+- 💾 Auto-download feature
 
 ---
 

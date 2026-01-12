@@ -38,7 +38,8 @@ REM Create gallery folders
 if not exist "app\gallery" mkdir app\gallery
 if not exist "app\gallery\images" mkdir app\gallery\images
 if not exist "app\gallery\videos" mkdir app\gallery\videos
-echo [OK] Gallery directories ready
+if not exist "app\modules" mkdir app\modules
+echo [OK] Application directories ready
 
 REM Check if node_modules exists
 if not exist "node_modules" (
