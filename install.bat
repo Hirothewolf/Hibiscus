@@ -1,15 +1,15 @@
 @echo off
 REM Hibiscus - Windows Installer
 REM This script checks for Node.js and sets up the application
+REM Note: This is for Web Mode. For desktop app, use the .exe from Releases.
 
 setlocal enabledelayedexpansion
 
 title Hibiscus Installer
 
 echo.
-echo ═══════════════════════════════════════════════════
-echo    🌺 Hibiscus Installer
-echo ═══════════════════════════════════════════════════
+echo    Hibiscus Installer (Web Mode)
+echo    ==============================
 echo.
 
 set "SCRIPT_DIR=%~dp0"
@@ -45,57 +45,20 @@ if %NODE_MAJOR% LSS %MIN_NODE_VERSION% (
 echo [OK] Node.js v%NODE_VER% found
 echo.
 
-REM Create gallery directory
+REM Create gallery directories
 if not exist "%SCRIPT_DIR%app\gallery" mkdir "%SCRIPT_DIR%app\gallery"
-echo [OK] Gallery directory ready
-
-REM Create run.bat
-echo Creating run script...
-(
-echo @echo off
-echo title ArtPollinations Studio
-echo cd /d "%%~dp0app"
-echo echo.
-echo echo 🎨 Starting ArtPollinations Studio...
-echo echo.
-echo start http://localhost:3333
-echo node server.js
-) > "%SCRIPT_DIR%run.bat"
-echo [OK] Run script created: run.bat
-
-REM Create desktop shortcut
-echo.
-set /p CREATE_SHORTCUT="Create desktop shortcut? (Y/N): "
-if /i "%CREATE_SHORTCUT%"=="Y" (
-    call :CreateShortcut
-)
+if not exist "%SCRIPT_DIR%app\gallery\images" mkdir "%SCRIPT_DIR%app\gallery\images"
+if not exist "%SCRIPT_DIR%app\gallery\videos" mkdir "%SCRIPT_DIR%app\gallery\videos"
+echo [OK] Gallery directories ready
 
 echo.
-echo ═══════════════════════════════════════════════════
-echo    ✓ Installation Complete!
-echo ═══════════════════════════════════════════════════
+echo    Installation Complete!
+echo    ======================
 echo.
 echo To start the application:
 echo   - Double-click 'run.bat'
-echo   - Or use the desktop shortcut
+echo.
+echo For desktop app, download from GitHub Releases.
 echo.
 pause
 exit /b 0
-
-:CreateShortcut
-REM Create VBS script to generate shortcut
-set "SHORTCUT_VBS=%TEMP%\create_shortcut.vbs"
-(
-echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
-echo sLinkFile = oWS.SpecialFolders^("Desktop"^) ^& "\Hibiscus.lnk"
-echo Set oLink = oWS.CreateShortcut^(sLinkFile^)
-echo oLink.TargetPath = "%SCRIPT_DIR%run.bat"
-echo oLink.WorkingDirectory = "%SCRIPT_DIR%"
-echo oLink.Description = "AI Image ^& Video Generation Studio"
-echo oLink.IconLocation = "shell32.dll,145"
-echo oLink.Save
-) > "%SHORTCUT_VBS%"
-cscript //nologo "%SHORTCUT_VBS%"
-del "%SHORTCUT_VBS%"
-echo [OK] Desktop shortcut created
-goto :eof

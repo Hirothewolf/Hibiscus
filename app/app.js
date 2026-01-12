@@ -115,6 +115,13 @@ const i18n = {
             'settings.filenamePrompt': 'Prompt resumido',
             'settings.filenameTimestamp': 'Timestamp',
             'settings.filenameBoth': 'Prompt + Timestamp',
+            'settings.mediaDir': 'Diretório de Mídia',
+            'settings.useCustomDir': 'Usar diretório personalizado',
+            'settings.mediaDirHint': 'Por padrão, usa a pasta da galeria do aplicativo',
+            'settings.customDir': 'Pasta Personalizada',
+            'settings.browse': 'Procurar',
+            'settings.dirSelected': 'Diretório selecionado',
+            'settings.dirReset': 'Usando diretório padrão',
             'settings.language': 'Idioma',
             'settings.theme': 'Tema',
             'settings.themeDark': 'Escuro',
@@ -284,6 +291,13 @@ const i18n = {
             'settings.filenamePrompt': 'Shortened prompt',
             'settings.filenameTimestamp': 'Timestamp',
             'settings.filenameBoth': 'Prompt + Timestamp',
+            'settings.mediaDir': 'Media Directory',
+            'settings.useCustomDir': 'Use custom directory',
+            'settings.mediaDirHint': 'By default, uses the app gallery folder',
+            'settings.customDir': 'Custom Folder',
+            'settings.browse': 'Browse',
+            'settings.dirSelected': 'Directory selected',
+            'settings.dirReset': 'Using default directory',
             'settings.language': 'Language',
             'settings.theme': 'Theme',
             'settings.themeDark': 'Dark',
@@ -453,6 +467,13 @@ const i18n = {
             'settings.filenamePrompt': 'Prompt resumido',
             'settings.filenameTimestamp': 'Timestamp',
             'settings.filenameBoth': 'Prompt + Timestamp',
+            'settings.mediaDir': 'Directorio de Medios',
+            'settings.useCustomDir': 'Usar directorio personalizado',
+            'settings.mediaDirHint': 'Por defecto, usa la carpeta de galería de la app',
+            'settings.customDir': 'Carpeta Personalizada',
+            'settings.browse': 'Explorar',
+            'settings.dirSelected': 'Directorio seleccionado',
+            'settings.dirReset': 'Usando directorio predeterminado',
             'settings.language': 'Idioma',
             'settings.theme': 'Tema',
             'settings.themeDark': 'Oscuro',
@@ -593,10 +614,17 @@ const Backend = {
     async saveItem(type, prompt, params, blob) {
         if (!this.available) return null;
         try {
+            const body = { type, prompt, params, blob };
+            
+            // Add custom directory if configured
+            if (state.useCustomMediaDir && state.customMediaDir) {
+                body.customDir = state.customMediaDir;
+            }
+            
             const response = await fetch(`${BACKEND_URL}/api/gallery`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, prompt, params, blob })
+                body: JSON.stringify(body)
             });
             if (response.ok) {
                 return await response.json();
@@ -735,6 +763,8 @@ const state = {
     autoDownload: localStorage.getItem('autoDownload') === 'true',
     downloadPath: localStorage.getItem('downloadPath') || 'Hibiscus',
     filenameFormat: localStorage.getItem('filenameFormat') || 'both',
+    useCustomMediaDir: localStorage.getItem('useCustomMediaDir') === 'true',
+    customMediaDir: localStorage.getItem('customMediaDir') || '',
     theme: localStorage.getItem('theme') || 'dark',
     language: localStorage.getItem('language') || 'pt',
     firstRun: localStorage.getItem('firstRun') !== 'false',
@@ -1552,22 +1582,6 @@ function setupImageEditing() {
             }
         }
     });
-    
-    // Add button for URL input
-    const addUrlBtn = document.createElement('button');
-    addUrlBtn.className = 'btn-upload';
-    addUrlBtn.textContent = '➕ Adicionar';
-    addUrlBtn.type = 'button';
-    addUrlBtn.addEventListener('click', () => {
-        const url = urlInput.value.trim();
-        if (url && url.startsWith('http')) {
-            addEditImage(url);
-            urlInput.value = '';
-        } else if (url) {
-            showToast(i18n.t('toast.invalidUrl'), 'warning');
-        }
-    });
-    document.getElementById('editImageUpload').appendChild(addUrlBtn);
     
     removeBtn.addEventListener('click', clearEditImages);
     
@@ -2459,6 +2473,58 @@ function setupSettings() {
             state.language = e.target.value;
             i18n.setLanguage(state.language);
             showToast('Idioma alterado!', 'success');
+        });
+    }
+    
+    // Media directory settings
+    const useCustomDirCheckbox = document.getElementById('useCustomMediaDir');
+    const customDirGroup = document.getElementById('customDirGroup');
+    const customDirInput = document.getElementById('customMediaDir');
+    const selectDirBtn = document.getElementById('selectMediaDirBtn');
+    
+    if (useCustomDirCheckbox) {
+        // Initialize state
+        useCustomDirCheckbox.checked = state.useCustomMediaDir;
+        customDirInput.value = state.customMediaDir;
+        customDirGroup.style.display = state.useCustomMediaDir ? 'block' : 'none';
+        
+        useCustomDirCheckbox.addEventListener('change', (e) => {
+            state.useCustomMediaDir = e.target.checked;
+            localStorage.setItem('useCustomMediaDir', state.useCustomMediaDir);
+            customDirGroup.style.display = state.useCustomMediaDir ? 'block' : 'none';
+            
+            if (!state.useCustomMediaDir) {
+                showToast(i18n.t('settings.dirReset'), 'info');
+            }
+        });
+        
+        selectDirBtn.addEventListener('click', async () => {
+            // Use File System Access API if available (modern browsers)
+            if ('showDirectoryPicker' in window) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker({
+                        mode: 'readwrite'
+                    });
+                    state.customMediaDir = dirHandle.name;
+                    state.customMediaDirHandle = dirHandle;
+                    localStorage.setItem('customMediaDir', state.customMediaDir);
+                    customDirInput.value = state.customMediaDir;
+                    showToast(i18n.t('settings.dirSelected'), 'success');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Directory selection failed:', err);
+                    }
+                }
+            } else {
+                // Fallback: show input for manual path entry
+                const path = prompt('Digite o caminho da pasta:', state.customMediaDir || '');
+                if (path) {
+                    state.customMediaDir = path;
+                    localStorage.setItem('customMediaDir', state.customMediaDir);
+                    customDirInput.value = state.customMediaDir;
+                    showToast(i18n.t('settings.dirSelected'), 'success');
+                }
+            }
         });
     }
 }

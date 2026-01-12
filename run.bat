@@ -1,20 +1,26 @@
 @echo off
-REM Hibiscus - Run Script
-title Hibiscus
+REM Hibiscus - Run Script (Web Mode)
+REM Use this to run Hibiscus in your browser without Electron
+title Hibiscus - AI Art Studio
 
 cd /d "%~dp0app"
 
 echo.
-echo 🌺 ═══════════════════════════════════════════════════
-echo    Hibiscus - AI Art Studio
-echo ═════════════════════════════════════════════════════
+echo    Hibiscus - AI Art Studio (Web Mode)
+echo    =====================================
 echo.
 
 REM Create gallery folder if not exists
 if not exist "gallery" mkdir gallery
+if not exist "gallery\images" mkdir gallery\images
+if not exist "gallery\videos" mkdir gallery\videos
 
 echo Starting server...
-echo Opening browser at http://localhost:3333
+echo.
+echo    Local:   http://localhost:3333
+echo    Network: http://%COMPUTERNAME%:3333
+echo.
+echo Press Ctrl+C to stop the server
 echo.
 
 REM Open browser after a short delay

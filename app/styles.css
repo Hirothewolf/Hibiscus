@@ -671,6 +671,22 @@ body {
     gap: 8px;
 }
 
+.dir-select-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.dir-select-row input {
+    flex: 1;
+    background: var(--bg-tertiary);
+    cursor: default;
+}
+
+.dir-select-row button {
+    white-space: nowrap;
+}
+
 @media (max-width: 900px) {
     .settings-grid-layout {
         grid-template-columns: 1fr;

@@ -24,11 +24,13 @@
   ],
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "electron-icon-builder": "^2.0.1"
   },
   "build": {
     "appId": "com.hibiscus.studio",
     "productName": "Hibiscus",
+    "asar": false,
     "directories": {
       "output": "dist"
     },
@@ -41,28 +43,29 @@
       {
         "from": "app/gallery",
         "to": "gallery",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {
       "target": [
         {
-          "target": "nsis",
-          "arch": ["x64"]
-        },
-        {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "icon": "app/icon.ico"
+      "icon": "app/icons/win/icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "app/icon.ico",
-      "uninstallerIcon": "app/icon.ico",
-      "installerHeaderIcon": "app/icon.ico",
+      "installerIcon": "app/icons/win/icon.ico",
+      "uninstallerIcon": "app/icons/win/icon.ico",
+      "installerHeaderIcon": "app/icons/win/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Hibiscus"
@@ -72,12 +75,14 @@
         "AppImage",
         "deb"
       ],
-      "icon": "app/icon.png",
+      "icon": "app/icons/png",
       "category": "Graphics"
     },
     "mac": {
-      "target": ["dmg"],
-      "icon": "app/icon.icns",
+      "target": [
+        "dmg"
+      ],
+      "icon": "app/icons/mac/icon.icns",
       "category": "public.app-category.graphics-design"
     }
   },

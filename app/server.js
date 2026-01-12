@@ -10,10 +10,28 @@ const path = require('path');
 
 // Configuration
 const PORT = process.env.PORT || 3333;
-const GALLERY_DIR = path.join(__dirname, 'gallery');
+
+// Detect if running in packaged Electron app
+function getGalleryPath() {
+    // Check if running in Electron packaged mode
+    if (process.env.ELECTRON_RUN_AS_NODE || process.resourcesPath) {
+        // In packaged Electron, gallery is in extraResources
+        const electronGallery = path.join(process.resourcesPath || '', 'gallery');
+        if (fs.existsSync(electronGallery) || process.resourcesPath) {
+            console.log('📦 Running in Electron packaged mode');
+            return electronGallery;
+        }
+    }
+    // Development mode - gallery is in same folder as server.js
+    return path.join(__dirname, 'gallery');
+}
+
+const GALLERY_DIR = getGalleryPath();
 const IMAGES_DIR = path.join(GALLERY_DIR, 'images');
 const VIDEOS_DIR = path.join(GALLERY_DIR, 'videos');
 const GALLERY_INDEX = path.join(GALLERY_DIR, 'index.json');
+
+console.log('📂 Gallery directory:', GALLERY_DIR);
 
 // Ensure gallery directories exist
 [GALLERY_DIR, IMAGES_DIR, VIDEOS_DIR].forEach(dir => {
@@ -169,7 +187,7 @@ async function handleAPI(req, res, pathname, query) {
         // POST /api/gallery - Save new item
         if (pathname === '/api/gallery' && req.method === 'POST') {
             const body = await parseBody(req);
-            const { type, prompt, params, blob } = body;
+            const { type, prompt, params, blob, customDir } = body;
             
             if (!blob) {
                 return sendError(res, 'No blob data provided', 400);
@@ -178,8 +196,16 @@ async function handleAPI(req, res, pathname, query) {
             const id = generateId(type);
             const dateFolder = getDateFolder();
             
-            // Use separate folders for images and videos
-            const typeDir = type === 'video' ? VIDEOS_DIR : IMAGES_DIR;
+            // Use custom directory if provided, otherwise use default
+            let typeDir;
+            if (customDir) {
+                // Custom directory: create images/videos subfolders inside it
+                const customBase = path.resolve(customDir);
+                typeDir = path.join(customBase, type === 'video' ? 'videos' : 'images');
+            } else {
+                typeDir = type === 'video' ? VIDEOS_DIR : IMAGES_DIR;
+            }
+            
             const folderPath = path.join(typeDir, dateFolder);
             
             // Create date folder

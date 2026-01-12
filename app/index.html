@@ -517,6 +517,24 @@
                         </div>
 
                         <div class="settings-section">
+                            <h3>📁 <span data-i18n="settings.mediaDir">Diretório de Mídia</span></h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="useCustomMediaDir">
+                                    <span data-i18n="settings.useCustomDir">Usar diretório personalizado</span>
+                                </label>
+                                <small data-i18n="settings.mediaDirHint">Por padrão, usa a pasta da galeria do aplicativo</small>
+                            </div>
+                            <div class="form-group" id="customDirGroup" style="display: none;">
+                                <label for="customMediaDir" data-i18n="settings.customDir">Pasta Personalizada</label>
+                                <div class="dir-select-row">
+                                    <input type="text" id="customMediaDir" readonly placeholder="Selecione uma pasta...">
+                                    <button class="btn-secondary" id="selectMediaDirBtn">📂 <span data-i18n="settings.browse">Procurar</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
                             <h3>🌐 <span data-i18n="settings.language">Idioma</span> / Language</h3>
                             <div class="form-group">
                                 <label for="language" data-i18n="settings.language">Idioma</label>

@@ -3,15 +3,12 @@
  * Creates a desktop application with embedded server
  */
 
-const { app, BrowserWindow, shell, Menu, Tray, dialog } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
 const http = require('http');
 
 const PORT = 3333;
 let mainWindow;
-let serverProcess;
-let tray;
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
@@ -27,14 +24,25 @@ if (!gotTheLock) {
     });
 }
 
+function getAppBasePath() {
+    // When packaged (asar: false), files are in resources/app/
+    // When in development, __dirname works fine
+    if (app.isPackaged) {
+        // With asar disabled, app files are in resources/app/
+        return path.join(process.resourcesPath, 'app');
+    }
+    return __dirname;
+}
+
 function createWindow() {
+    const basePath = getAppBasePath();
     mainWindow = new BrowserWindow({
         width: 1400,
         height: 900,
         minWidth: 800,
         minHeight: 600,
         title: 'Hibiscus 🌺',
-        icon: path.join(__dirname, 'app', 'icon.png'),
+        icon: path.join(basePath, 'app', 'icons', 'png', '256x256.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
@@ -62,16 +70,10 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-
-    mainWindow.on('close', (event) => {
-        if (process.platform !== 'darwin') {
-            event.preventDefault();
-            mainWindow.hide();
-        }
-    });
 }
 
 function createMenu() {
+    const basePath = getAppBasePath();
     const template = [
         {
             label: 'File',
@@ -79,7 +81,7 @@ function createMenu() {
                 {
                     label: 'Open Gallery Folder',
                     click: () => {
-                        const galleryPath = path.join(__dirname, 'app', 'gallery');
+                        const galleryPath = path.join(basePath, 'app', 'gallery');
                         shell.openPath(galleryPath);
                     }
                 },
@@ -138,89 +140,50 @@ function createMenu() {
     return Menu.buildFromTemplate(template);
 }
 
-function createTray() {
-    const iconPath = path.join(__dirname, 'app', 'icon.png');
-    tray = new Tray(iconPath);
-    
-    const contextMenu = Menu.buildFromTemplate([
-        {
-            label: 'Show App',
-            click: () => {
-                if (mainWindow) {
-                    mainWindow.show();
-                }
-            }
-        },
-        {
-            label: 'Open Gallery',
-            click: () => {
-                shell.openPath(path.join(__dirname, 'app', 'gallery'));
-            }
-        },
-        { type: 'separator' },
-        {
-            label: 'Quit',
-            click: () => {
-                app.quit();
-            }
-        }
-    ]);
-    
-    tray.setToolTip('Hibiscus 🌺');
-    tray.setContextMenu(contextMenu);
-    
-    tray.on('click', () => {
-        if (mainWindow) {
-            mainWindow.show();
-        }
-    });
-}
-
 function startServer() {
     return new Promise((resolve, reject) => {
-        const serverPath = path.join(__dirname, 'app', 'server.js');
-        
-        serverProcess = spawn(process.execPath, [serverPath], {
-            cwd: path.join(__dirname, 'app'),
-            env: { ...process.env, PORT: PORT.toString() }
-        });
-        
-        serverProcess.stdout.on('data', (data) => {
-            console.log(`Server: ${data}`);
-        });
-        
-        serverProcess.stderr.on('data', (data) => {
-            console.error(`Server Error: ${data}`);
-        });
-        
-        serverProcess.on('error', (error) => {
-            console.error('Failed to start server:', error);
-            reject(error);
-        });
-        
-        // Wait for server to be ready
-        const checkServer = setInterval(() => {
-            http.get(`http://localhost:${PORT}`, (res) => {
+        try {
+            const basePath = getAppBasePath();
+            const serverPath = path.join(basePath, 'app', 'server.js');
+            const appFolder = path.join(basePath, 'app');
+            
+            console.log('App packaged:', app.isPackaged);
+            console.log('Base path:', basePath);
+            console.log('Server path:', serverPath);
+            console.log('App folder:', appFolder);
+            
+            // Set environment variables
+            process.env.PORT = PORT.toString();
+            
+            // Change working directory to app folder for correct paths
+            process.chdir(appFolder);
+            
+            // Require the server (this will start it)
+            require(serverPath);
+            
+            // Wait for server to be ready
+            const checkServer = setInterval(() => {
+                http.get(`http://localhost:${PORT}`, (res) => {
+                    clearInterval(checkServer);
+                    console.log('Server ready!');
+                    resolve();
+                }).on('error', () => {
+                    // Server not ready yet
+                });
+            }, 100);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
                 clearInterval(checkServer);
-                resolve();
-            }).on('error', () => {
-                // Server not ready yet
-            });
-        }, 100);
-        
-        // Timeout after 10 seconds
-        setTimeout(() => {
-            clearInterval(checkServer);
-            resolve(); // Try anyway
-        }, 10000);
+                resolve(); // Try anyway
+            }, 10000);
+            
+        } catch (error) {
+            console.error('Failed to start server:', error);
+            console.error('Error details:', error.stack);
+            reject(error);
+        }
     });
-}
-
-function stopServer() {
-    if (serverProcess) {
-        serverProcess.kill();
-        serverProcess = null;
-    }
 }
 
 // App events
@@ -232,7 +195,6 @@ app.whenReady().then(async () => {
         console.log('Server started on port', PORT);
         
         createWindow();
-        createTray();
     } catch (error) {
         console.error('Failed to start:', error);
         dialog.showErrorBox('Startup Error', 'Failed to start the application server.');
@@ -241,9 +203,7 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        // Don't quit, keep in tray
-    }
+    app.quit();
 });
 
 app.on('activate', () => {
@@ -255,15 +215,14 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', () => {
-    stopServer();
+    // Server runs in same process, will be stopped automatically
 });
 
 app.on('will-quit', () => {
-    stopServer();
+    // Server runs in same process, will be stopped automatically
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
-    stopServer();
 });

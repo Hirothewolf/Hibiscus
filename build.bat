@@ -1,24 +1,27 @@
 @echo off
-REM Hibiscus - Build Script for Windows
-REM This creates a standalone .exe installer
+REM Hibiscus - Build Script
+REM Builds the Electron desktop application
 
-title Building Hibiscus
+setlocal enabledelayedexpansion
+
+title Hibiscus Build
 
 echo.
-echo ═══════════════════════════════════════════════════
-echo    Building Hibiscus
-echo ═══════════════════════════════════════════════════
+echo    Hibiscus Build Script
+echo    ======================
 echo.
+
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%"
 
 REM Check for Node.js
 where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Node.js not found! Please install from https://nodejs.org/
+    echo [ERROR] Node.js not found!
+    echo Please install Node.js from: https://nodejs.org/
     pause
     exit /b 1
 )
-
-echo [OK] Node.js found
 
 REM Check for npm
 where npm >nul 2>nul
@@ -28,40 +31,66 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo [OK] npm found
+echo [OK] Node.js and npm found
+echo.
 
-REM Create gallery folder if not exists
+REM Create gallery folders
 if not exist "app\gallery" mkdir app\gallery
-echo [OK] Gallery directory ready
+if not exist "app\gallery\images" mkdir app\gallery\images
+if not exist "app\gallery\videos" mkdir app\gallery\videos
+echo [OK] Gallery directories ready
 
-REM Install dependencies
-echo.
-echo Installing dependencies...
-call npm install
-if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Failed to install dependencies
-    pause
-    exit /b 1
+REM Check if node_modules exists
+if not exist "node_modules" (
+    echo.
+    echo Installing dependencies...
+    call npm install
+    if %ERRORLEVEL% NEQ 0 (
+        echo [ERROR] Failed to install dependencies
+        pause
+        exit /b 1
+    )
+    echo [OK] Dependencies installed
 )
-echo [OK] Dependencies installed
 
-REM Build the application
+REM Clean previous build
+if exist "dist" (
+    echo.
+    echo Cleaning previous build...
+    rmdir /s /q dist 2>nul
+    timeout /t 2 >nul
+    echo [OK] Previous build cleaned
+)
+
 echo.
-echo Building Windows installer...
+echo Building Windows portable app...
+echo.
+
 call npm run build:win
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Build failed
+    echo.
+    echo [ERROR] Build failed!
+    echo.
+    echo Common fixes:
+    echo   - Run as Administrator
+    echo   - Check internet connection
+    echo   - Delete node_modules and run: npm install
+    echo.
     pause
     exit /b 1
 )
 
 echo.
-echo ═══════════════════════════════════════════════════
-echo    ✓ Build Complete!
-echo ═══════════════════════════════════════════════════
+echo    Build Complete!
+echo    ===============
 echo.
-echo Output files are in the 'dist' folder:
-echo   - Hibiscus Setup.exe (Installer)
-echo   - Hibiscus.exe (Portable)
+echo Output: dist\Hibiscus 1.0.0.exe
 echo.
+
+REM Ask to open folder
+set /p OPEN_FOLDER="Open output folder? (Y/N): "
+if /i "%OPEN_FOLDER%"=="Y" (
+    start "" "%SCRIPT_DIR%dist"
+)
+
 pause
