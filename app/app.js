@@ -918,7 +918,9 @@ async function applyImageEdit() {
         prompt: prompt.slice(0, 100), 
         imageCount: state.editImages.length || 1,
         hasBase64: hasBase64Images,
-        hasUrl: hasUrlImages
+        hasUrl: hasUrlImages,
+        editImagesLength: state.editImages.length,
+        imageUrlsInput: imageUrls.slice(0, 100)
     });
     
     showLoading('editLoading', true);
@@ -929,15 +931,33 @@ async function applyImageEdit() {
         // If we have base64 images, we need to upload them first
         if (state.editImages.length > 0 && hasBase64Images) {
             showToast(i18n.t('toast.uploadingImages'), 'info');
-            const uploadedUrls = await uploadImagesToTempHost(state.editImages);
-            finalImageUrls = uploadedUrls.join('|');
-            Logger.info('Images uploaded', { urls: uploadedUrls });
+            Logger.info('Uploading base64 images', { count: state.editImages.length });
+            try {
+                const uploadedUrls = await uploadImagesToTempHost(state.editImages);
+                if (!uploadedUrls || uploadedUrls.length === 0) {
+                    throw new Error('Upload service failed for all images');
+                }
+                finalImageUrls = uploadedUrls.join('|');
+                Logger.info('Images uploaded successfully', { urls: uploadedUrls.length, finalLength: finalImageUrls.length });
+            } catch (uploadError) {
+                Logger.error('Image upload failed', { error: uploadError.message });
+                throw new Error(`Falha ao fazer upload das imagens: ${uploadError.message}`);
+            }
         } else if (state.editImages.length > 0) {
             // Already URL images
             finalImageUrls = state.editImages.join('|');
+            Logger.info('Using URL images', { count: state.editImages.length });
         } else {
             // Single URL from input
+            if (!imageUrls) {
+                throw new Error('Nenhuma imagem fornecida');
+            }
             finalImageUrls = imageUrls;
+            Logger.info('Using input URL', { length: finalImageUrls.length });
+        }
+        
+        if (!finalImageUrls || finalImageUrls.length === 0) {
+            throw new Error('URL de imagem vazia');
         }
         
         const params = {
@@ -956,7 +976,7 @@ async function applyImageEdit() {
         };
     
         const url = buildImageUrl(prompt, params);
-        Logger.debug('Edit URL built', { urlLength: url.length, url: url.slice(0, 300) });
+        Logger.debug('Edit URL built', { urlLength: url.length, urlPreview: url.slice(0, 500) });
         
         // Reset safety retry state for this context
         safetyRetryStates.editLoading = { active: false, cancelled: false, failures: 0, currentAttempt: 0 };
@@ -1862,7 +1882,12 @@ async function downloadFile(blob, filepath, type) {
  * - Base64 images are uploaded to a temp host or used directly if short enough
  */
 async function uploadImagesToTempHost(images) {
+    if (!images || images.length === 0) {
+        throw new Error('Nenhuma imagem para fazer upload');
+    }
+    
     const processedUrls = [];
+    let uploadErrors = [];
     
     for (let i = 0; i < images.length; i++) {
         const imageData = images[i];
@@ -1870,44 +1895,84 @@ async function uploadImagesToTempHost(images) {
         // If already a URL, keep it
         if (imageData.startsWith('http')) {
             processedUrls.push(imageData);
+            Logger.debug(`Image ${i + 1} is already a URL`);
             continue;
         }
         
         try {
-            Logger.debug(`Processing image ${i + 1}/${images.length}`);
+            Logger.info(`Processing image ${i + 1}/${images.length}`, { isBase64: imageData.startsWith('data:') });
             showToast(`Processando imagem ${i + 1}/${images.length}...`, 'info');
             
             // Try multiple upload methods in order
             let url = null;
+            let lastError = null;
             
             // Method 1: Try 0x0.st (simple pastebin for images, no CORS issues)
-            url = await uploadTo0x0(imageData);
+            try {
+                Logger.debug(`Tentando 0x0.st para imagem ${i + 1}`);
+                url = await uploadTo0x0(imageData);
+                if (url) {
+                    Logger.info(`Image ${i + 1} uploaded to 0x0.st`);
+                }
+            } catch (e) {
+                lastError = e;
+                Logger.warn(`0x0.st failed for image ${i + 1}`, { error: e.message });
+            }
             
             // Method 2: Try catbox.moe
             if (!url) {
-                url = await uploadToCatbox(imageData);
+                try {
+                    Logger.debug(`Tentando catbox.moe para imagem ${i + 1}`);
+                    url = await uploadToCatbox(imageData);
+                    if (url) {
+                        Logger.info(`Image ${i + 1} uploaded to catbox.moe`);
+                    }
+                } catch (e) {
+                    lastError = e;
+                    Logger.warn(`catbox.moe failed for image ${i + 1}`, { error: e.message });
+                }
             }
             
             // Method 3: Try litterbox (temp files)
             if (!url) {
-                url = await uploadToLitterbox(imageData);
+                try {
+                    Logger.debug(`Tentando litterbox para imagem ${i + 1}`);
+                    url = await uploadToLitterbox(imageData);
+                    if (url) {
+                        Logger.info(`Image ${i + 1} uploaded to litterbox`);
+                    }
+                } catch (e) {
+                    lastError = e;
+                    Logger.warn(`litterbox failed for image ${i + 1}`, { error: e.message });
+                }
             }
             
             // Method 4: Use base64 directly (some models accept it)
             if (!url) {
-                Logger.warn('All upload services failed, using base64 directly');
-                // The API might accept data URLs directly for some models
+                Logger.warn(`All upload services failed for image ${i + 1}, using base64 directly`);
+                if (lastError) {
+                    uploadErrors.push(`Imagem ${i + 1}: ${lastError.message}`);
+                }
                 url = imageData;
             }
             
             processedUrls.push(url);
-            Logger.info(`Image ${i + 1} processed`, { isBase64: url.startsWith('data:') });
+            Logger.debug(`Image ${i + 1} processed`, { isBase64: url.startsWith('data:'), urlLength: url.length });
             
         } catch (error) {
             Logger.error(`Failed to process image ${i + 1}`, { error: error.message });
+            uploadErrors.push(`Imagem ${i + 1}: ${error.message}`);
             // Use base64 as fallback
-            processedUrls.push(imageData);
+            processedUrls.push(images[i]);
         }
+    }
+    
+    if (uploadErrors.length > 0) {
+        Logger.warn('Some images had upload issues', { errors: uploadErrors });
+    }
+    
+    if (processedUrls.length === 0) {
+        throw new Error('Nenhuma imagem pôde ser processada');
     }
     
     return processedUrls;
@@ -1922,24 +1987,36 @@ async function uploadTo0x0(base64Data) {
         const formData = new FormData();
         formData.append('file', blob, 'image.png');
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
         const response = await fetch('https://0x0.st', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
             const url = await response.text();
-            if (url && url.startsWith('http')) {
-                Logger.info('0x0.st upload successful');
+            if (url && url.trim().startsWith('http')) {
+                Logger.info('0x0.st upload successful', { url: url.substring(0, 100) });
                 return url.trim();
             }
+            throw new Error(`Invalid response from 0x0.st: ${url.substring(0, 100)}`);
         }
         
-        Logger.warn('0x0.st upload failed', { status: response.status });
-        return null;
+        const errorText = await response.text().catch(() => 'unknown error');
+        Logger.warn('0x0.st upload failed', { status: response.status, error: errorText.substring(0, 100) });
+        throw new Error(`HTTP ${response.status}`);
     } catch (error) {
+        if (error.name === 'AbortError') {
+            Logger.warn('0x0.st upload timeout');
+            throw new Error('Upload timeout (0x0.st)');
+        }
         Logger.warn('0x0.st upload error', { error: error.message });
-        return null;
+        throw error;
     }
 }
 
@@ -1953,24 +2030,36 @@ async function uploadToCatbox(base64Data) {
         formData.append('reqtype', 'fileupload');
         formData.append('fileToUpload', blob, 'image.png');
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
         const response = await fetch('https://catbox.moe/user/api.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
             const url = await response.text();
-            if (url && url.startsWith('http')) {
-                Logger.info('Catbox upload successful');
+            if (url && url.trim().startsWith('http')) {
+                Logger.info('Catbox upload successful', { url: url.substring(0, 100) });
                 return url.trim();
             }
+            throw new Error(`Invalid response from catbox: ${url.substring(0, 100)}`);
         }
         
-        Logger.warn('Catbox upload failed', { status: response.status });
-        return null;
+        const errorText = await response.text().catch(() => 'unknown error');
+        Logger.warn('Catbox upload failed', { status: response.status, error: errorText.substring(0, 100) });
+        throw new Error(`HTTP ${response.status}`);
     } catch (error) {
+        if (error.name === 'AbortError') {
+            Logger.warn('Catbox upload timeout');
+            throw new Error('Upload timeout (catbox)');
+        }
         Logger.warn('Catbox upload error', { error: error.message });
-        return null;
+        throw error;
     }
 }
 
@@ -1985,24 +2074,36 @@ async function uploadToLitterbox(base64Data) {
         formData.append('time', '1h');
         formData.append('fileToUpload', blob, 'image.png');
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
         const response = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
             const url = await response.text();
-            if (url && url.startsWith('http')) {
-                Logger.info('Litterbox upload successful');
+            if (url && url.trim().startsWith('http')) {
+                Logger.info('Litterbox upload successful', { url: url.substring(0, 100) });
                 return url.trim();
             }
+            throw new Error(`Invalid response from litterbox: ${url.substring(0, 100)}`);
         }
         
-        Logger.warn('Litterbox upload failed', { status: response.status });
-        return null;
+        const errorText = await response.text().catch(() => 'unknown error');
+        Logger.warn('Litterbox upload failed', { status: response.status, error: errorText.substring(0, 100) });
+        throw new Error(`HTTP ${response.status}`);
     } catch (error) {
+        if (error.name === 'AbortError') {
+            Logger.warn('Litterbox upload timeout');
+            throw new Error('Upload timeout (litterbox)');
+        }
         Logger.warn('Litterbox upload error', { error: error.message });
-        return null;
+        throw error;
     }
 }
 
