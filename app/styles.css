@@ -1198,6 +1198,57 @@ body {
     color: white;
 }
 
+/* ===== Resolution Multiplier Toggle ===== */
+.resolution-multiplier-group {
+    margin-bottom: 16px;
+}
+
+.resolution-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.res-btn {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 50px;
+}
+
+.res-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.res-btn.active {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-color: transparent;
+    color: white;
+}
+
+.resolution-info {
+    font-size: 12px;
+    display: none;
+}
+
+.resolution-info.visible {
+    display: block;
+    padding: 8px 12px;
+    margin-top: 8px;
+    background: rgba(251, 191, 36, 0.15);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fff !important;
+}
+
 /* ===== Safety Retry UI ===== */
 .safety-retry-info {
     margin-top: 16px;

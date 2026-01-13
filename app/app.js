@@ -94,6 +94,88 @@ function loadFormOptionsToUI() {
     if (videoEnhance) videoEnhance.checked = opts.video.enhance;
 }
 
+// ===== Resolution Multiplier =====
+let currentResolutionMultiplier = 1;
+let editResolutionMultiplier = 1;
+
+function setupResolutionMultiplier() {
+    // Setup for image generation
+    setupResolutionToggle('resolutionToggle', 'imageAspectRatios', 'imageWidth', 'imageHeight', 'resolutionInfo', 'image');
+    
+    // Setup for img2img (edit)
+    setupResolutionToggle('editResolutionToggle', 'editAspectRatios', 'editWidth', 'editHeight', 'editResolutionInfo', 'edit');
+}
+
+function setupResolutionToggle(toggleId, aspectId, widthId, heightId, infoId, context) {
+    const toggle = document.getElementById(toggleId);
+    
+    if (!toggle) return;
+    
+    // Handle multiplier button clicks
+    toggle.querySelectorAll('.res-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            toggle.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const multiplier = parseInt(btn.dataset.multiplier);
+            if (context === 'image') {
+                currentResolutionMultiplier = multiplier;
+            } else {
+                editResolutionMultiplier = multiplier;
+            }
+            
+            applyResolutionMultiplierFor(aspectId, widthId, heightId, infoId, multiplier);
+        });
+    });
+    
+    // Initial update
+    updateResolutionInfoFor(infoId, context === 'image' ? currentResolutionMultiplier : editResolutionMultiplier);
+}
+
+function applyResolutionMultiplier() {
+    applyResolutionMultiplierFor('imageAspectRatios', 'imageWidth', 'imageHeight', 'resolutionInfo', currentResolutionMultiplier);
+}
+
+function applyResolutionMultiplierFor(aspectId, widthId, heightId, infoId, multiplier) {
+    // Get current aspect ratio base dimensions
+    const activeAspectBtn = document.querySelector(`#${aspectId} .aspect-btn.active`);
+    const baseWidth = parseInt(activeAspectBtn?.dataset.w) || 1024;
+    const baseHeight = parseInt(activeAspectBtn?.dataset.h) || 1024;
+    
+    // Calculate new dimensions - simple multiplication
+    const newWidth = baseWidth * multiplier;
+    const newHeight = baseHeight * multiplier;
+    
+    // Update input fields
+    const widthInput = document.getElementById(widthId);
+    const heightInput = document.getElementById(heightId);
+    
+    if (widthInput) widthInput.value = newWidth;
+    if (heightInput) heightInput.value = newHeight;
+    
+    // Update info display
+    updateResolutionInfoFor(infoId, multiplier);
+}
+
+function updateResolutionInfo() {
+    updateResolutionInfoFor('resolutionInfo', currentResolutionMultiplier);
+}
+
+function updateResolutionInfoFor(infoId, multiplier) {
+    const infoEl = document.getElementById(infoId);
+    
+    if (infoEl) {
+        // Show warning only when multiplier > 1 (2x or 4x)
+        if (multiplier > 1) {
+            infoEl.textContent = i18n.t('image.resolutionWarning');
+            infoEl.classList.add('visible');
+        } else {
+            infoEl.textContent = '';
+            infoEl.classList.remove('visible');
+        }
+    }
+}
+
 function setupFormOptionsListeners() {
     // Image generation listeners
     const imageFields = ['imageModel', 'quality', 'seed', 'guidance'];
@@ -250,6 +332,9 @@ async function continueInitialization() {
     
     // Setup aspect ratio buttons
     setupAspectRatioButtons();
+    
+    // Setup resolution multiplier
+    setupResolutionMultiplier();
     
     // Setup forms
     setupImageGeneration();
@@ -438,8 +523,14 @@ function setupAspectRatioContainer(containerId, widthInputId, heightInputId) {
             // Save to form options
             if (isEditForm) {
                 state.formOptions.edit.aspectRatio = btn.dataset.ratio;
+                // Apply resolution multiplier for edit
+                applyResolutionMultiplierFor('editAspectRatios', 'editWidth', 'editHeight', 'editResolutionInfo', editResolutionMultiplier);
             } else {
                 state.formOptions.image.aspectRatio = btn.dataset.ratio;
+                // Apply resolution multiplier for image generation
+                if (typeof applyResolutionMultiplier === 'function') {
+                    applyResolutionMultiplier();
+                }
             }
             saveFormOptions();
             
@@ -2124,9 +2215,11 @@ async function fetchWithSafetyRetry(url, loadingElementId) {
     retryState.failures = 0;
     retryState.currentAttempt = 1;
     
+    Logger.info('Starting safety retry loop', { context: loadingElementId, maxRetries: MAX_SAFETY_RETRIES });
+    
     for (let attempt = 1; attempt <= MAX_SAFETY_RETRIES; attempt++) {
         if (retryState.cancelled) {
-            Logger.info('Safety retry cancelled by user', { context: loadingElementId });
+            Logger.info('Safety retry cancelled by user', { context: loadingElementId, attempt });
             return null;
         }
         
@@ -2139,11 +2232,24 @@ async function fetchWithSafetyRetry(url, loadingElementId) {
             if (response.ok) {
                 const blob = await response.blob();
                 retryState.active = false;
+                Logger.info('Image fetch successful', { context: loadingElementId, attempt });
                 return { blob, attempts: attempt };
             }
             
             // Check for auth errors first
-            const errorText = await response.text().catch(() => '');
+            let errorText = '';
+            try {
+                errorText = await response.text();
+            } catch (e) {
+                errorText = `[Could not read error: ${e.message}]`;
+            }
+            
+            Logger.warn('Image fetch failed', { 
+                context: loadingElementId, 
+                attempt, 
+                status: response.status, 
+                errorPreview: errorText.substring(0, 200) 
+            });
             
             if (response.status === 401) {
                 const authError = new Error(`AUTH_ERROR: ${errorText}`);
@@ -2172,7 +2278,7 @@ async function fetchWithSafetyRetry(url, loadingElementId) {
             
             if (isSafetyError) {
                 retryState.failures++;
-                Logger.warn(`Safety filter triggered (attempt ${attempt})`, { 
+                Logger.warn(`Safety filter triggered (attempt ${attempt}/${MAX_SAFETY_RETRIES})`, { 
                     failures: retryState.failures,
                     context: loadingElementId
                 });
@@ -2189,34 +2295,45 @@ async function fetchWithSafetyRetry(url, loadingElementId) {
                 continue;
             }
             
-            // Not a safety error, use normal retry logic
-            if (response.status === 500 || response.status === 429) {
+            // Not a safety error - check if it's a retryable error
+            if (response.status === 500 || response.status === 502 || response.status === 503 || response.status === 429) {
                 const delay = RETRY_DELAYS[Math.min(attempt - 1, RETRY_DELAYS.length - 1)];
+                Logger.warn(`Server error, retrying in ${delay}ms`, { status: response.status, attempt });
                 showToast(i18n.t('toast.networkError', { attempt, max: MAX_SAFETY_RETRIES }), 'warning');
                 await sleep(delay);
                 continue;
             }
             
-            // Other error, throw
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+            // Other unrecoverable error - but DON'T throw, log and continue to try again
+            Logger.error(`Unexpected HTTP error, continuing retry`, { status: response.status, error: errorText.substring(0, 200) });
+            await sleep(1000);
+            continue;
             
         } catch (error) {
             if (retryState.cancelled) {
+                Logger.info('Retry cancelled during error handling', { context: loadingElementId });
                 return null;
             }
             
-            // Network error, retry
-            if (error.name === 'TypeError' || error.message.includes('fetch')) {
-                Logger.warn(`Network error on attempt ${attempt}`, { error: error.message });
-                await sleep(1000);
-                continue;
+            // Auth or balance error - these should stop retrying
+            if (error.isAuthError || error.isBalanceError) {
+                Logger.error('Critical error, stopping retries', { error: error.message });
+                throw error;
             }
             
-            throw error;
+            // Network error or other - log and retry
+            Logger.warn(`Error on attempt ${attempt}, continuing`, { 
+                error: error.message, 
+                name: error.name,
+                context: loadingElementId 
+            });
+            await sleep(1000);
+            continue;
         }
     }
     
     retryState.active = false;
+    Logger.error('All safety retries exhausted', { context: loadingElementId, maxRetries: MAX_SAFETY_RETRIES });
     throw new Error(`Falha após ${MAX_SAFETY_RETRIES} tentativas do filtro de segurança`);
 }
 

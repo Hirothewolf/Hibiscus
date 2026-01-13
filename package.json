@@ -1,6 +1,6 @@
 {
   "name": "hibiscus",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "AI Image & Video Generation Studio powered by Pollinations.ai",
   "main": "main.js",
   "scripts": {

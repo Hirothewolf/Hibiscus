@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.1.0-ff69b4?style=for-the-badge" alt="Version 1.1.0"/>
+  <img src="https://img.shields.io/badge/Version-1.2.0-ff69b4?style=for-the-badge" alt="Version 1.2.0"/>
   <a href="https://hibiscus-yp9g.onrender.com/">
     <img src="https://img.shields.io/badge/🌺%20Try%20Live%20Demo-hibiscus--yp9g.onrender.com-ff69b4?style=for-the-badge" alt="Live Demo"/>
   </a>
@@ -181,6 +181,12 @@ Hibiscus/
 ---
 
 ## 📋 Changelog
+
+### v1.2.0 (January 2026)
+- 🔢 **Resolution Multiplier** - 1x, 2x, 4x toggle for high-res output on image & img2img
+- 📐 **Extended Aspect Ratios** - 10 presets: 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9
+- 🛡️ **Improved Safety Retry** - More robust error handling, fewer false cancellations
+- 🎨 **UI Consistency** - Unified button styling across the app
 
 ### v1.1.0 (January 2026)
 - ✨ **Modular Architecture** - Code split into reusable modules (i18n, logger, state, backend)
