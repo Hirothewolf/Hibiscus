@@ -1907,19 +1907,33 @@ async function uploadImagesToTempHost(images) {
             let url = null;
             let lastError = null;
             
-            // Method 1: Try 0x0.st (simple pastebin for images, no CORS issues)
+            // Method 1: Try freeimage.host (most reliable, free)
             try {
-                Logger.debug(`Tentando 0x0.st para imagem ${i + 1}`);
-                url = await uploadTo0x0(imageData);
+                Logger.debug(`Tentando freeimage.host para imagem ${i + 1}`);
+                url = await uploadToImgbb(imageData);
                 if (url) {
-                    Logger.info(`Image ${i + 1} uploaded to 0x0.st`);
+                    Logger.info(`Image ${i + 1} uploaded to freeimage.host`);
                 }
             } catch (e) {
                 lastError = e;
-                Logger.warn(`0x0.st failed for image ${i + 1}`, { error: e.message });
+                Logger.warn(`freeimage.host failed for image ${i + 1}`, { error: e.message });
             }
             
-            // Method 2: Try catbox.moe
+            // Method 2: Try 0x0.st (simple pastebin for images, no CORS issues)
+            if (!url) {
+                try {
+                    Logger.debug(`Tentando 0x0.st para imagem ${i + 1}`);
+                    url = await uploadTo0x0(imageData);
+                    if (url) {
+                        Logger.info(`Image ${i + 1} uploaded to 0x0.st`);
+                    }
+                } catch (e) {
+                    lastError = e;
+                    Logger.warn(`0x0.st failed for image ${i + 1}`, { error: e.message });
+                }
+            }
+            
+            // Method 3: Try catbox.moe
             if (!url) {
                 try {
                     Logger.debug(`Tentando catbox.moe para imagem ${i + 1}`);
@@ -1933,7 +1947,7 @@ async function uploadImagesToTempHost(images) {
                 }
             }
             
-            // Method 3: Try litterbox (temp files)
+            // Method 4: Try litterbox (temp files)
             if (!url) {
                 try {
                     Logger.debug(`Tentando litterbox para imagem ${i + 1}`);
@@ -1947,23 +1961,22 @@ async function uploadImagesToTempHost(images) {
                 }
             }
             
-            // Method 4: Use base64 directly (some models accept it)
+            // If all upload services failed, we cannot use base64 - the API doesn't accept it
             if (!url) {
-                Logger.warn(`All upload services failed for image ${i + 1}, using base64 directly`);
-                if (lastError) {
-                    uploadErrors.push(`Imagem ${i + 1}: ${lastError.message}`);
-                }
-                url = imageData;
+                const errorMsg = lastError ? lastError.message : 'Todos os serviços de upload falharam';
+                Logger.error(`All upload services failed for image ${i + 1}`, { lastError: errorMsg });
+                uploadErrors.push(`Imagem ${i + 1}: ${errorMsg}`);
+                // Don't add to processedUrls - this image failed
+                continue;
             }
             
             processedUrls.push(url);
-            Logger.debug(`Image ${i + 1} processed`, { isBase64: url.startsWith('data:'), urlLength: url.length });
+            Logger.debug(`Image ${i + 1} processed`, { urlLength: url.length });
             
         } catch (error) {
             Logger.error(`Failed to process image ${i + 1}`, { error: error.message });
             uploadErrors.push(`Imagem ${i + 1}: ${error.message}`);
-            // Use base64 as fallback
-            processedUrls.push(images[i]);
+            // Don't add failed images
         }
     }
     
@@ -1971,11 +1984,65 @@ async function uploadImagesToTempHost(images) {
         Logger.warn('Some images had upload issues', { errors: uploadErrors });
     }
     
+    // Check if we have any successfully uploaded images
     if (processedUrls.length === 0) {
-        throw new Error('Nenhuma imagem pôde ser processada');
+        throw new Error('Nenhum serviço de upload está disponível. Tente novamente mais tarde ou use uma URL de imagem diretamente.');
+    }
+    
+    // Check if all URLs are valid (not base64)
+    const hasBase64 = processedUrls.some(url => url.startsWith('data:'));
+    if (hasBase64) {
+        throw new Error('Não foi possível fazer upload de algumas imagens. Tente usar URLs de imagem diretamente.');
     }
     
     return processedUrls;
+}
+
+/**
+ * Upload to freeimage.host (free, reliable, no API key needed)
+ */
+async function uploadToImgbb(base64Data) {
+    try {
+        // Extract just the base64 data without the prefix
+        const base64Only = base64Data.replace(/^data:image\/\w+;base64,/, '');
+        
+        const formData = new FormData();
+        formData.append('source', base64Only);
+        formData.append('type', 'base64');
+        formData.append('action', 'upload');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        
+        // Using freeimage.host anonymous upload
+        const response = await fetch('https://freeimage.host/api/1/upload?key=6d207e02198a847aa98d0a2a901485a5', {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status_code === 200 && data.image && data.image.url) {
+                Logger.info('freeimage.host upload successful', { url: data.image.url });
+                return data.image.url;
+            }
+            throw new Error(`Invalid response from freeimage.host: ${JSON.stringify(data).substring(0, 100)}`);
+        }
+        
+        const errorText = await response.text().catch(() => 'unknown error');
+        Logger.warn('freeimage.host upload failed', { status: response.status, error: errorText.substring(0, 100) });
+        throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            Logger.warn('freeimage.host upload timeout');
+            throw new Error('Upload timeout (freeimage.host)');
+        }
+        Logger.warn('freeimage.host upload error', { error: error.message });
+        throw error;
+    }
 }
 
 /**

@@ -41,3 +41,5 @@ npm-debug.log*
 # Temp files
 *.tmp
 *.temp
+api.yaml
+api.yaml
