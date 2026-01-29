@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.2.0-ff69b4?style=for-the-badge" alt="Version 1.2.0"/>
+  <img src="https://img.shields.io/badge/Version-2.0.0-ff69b4?style=for-the-badge" alt="Version 2.0.0"/>
   <a href="https://hibiscus-yp9g.onrender.com/">
     <img src="https://img.shields.io/badge/🌺%20Try%20Live%20Demo-hibiscus--yp9g.onrender.com-ff69b4?style=for-the-badge" alt="Live Demo"/>
   </a>
