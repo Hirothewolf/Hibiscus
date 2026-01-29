@@ -43,3 +43,7 @@ npm-debug.log*
 *.temp
 api.yaml
 api.yaml
+hibiscus-logs*
+.playwright-mcp/
+app/gallery/index.json.bak
+migrate-favorites.js

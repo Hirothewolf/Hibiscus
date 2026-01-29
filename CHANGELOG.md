@@ -1,37 +1,40 @@
 # Changelog
 
-All notable changes to Hibiscus will be documented in this file.
+All notable changes to the **Hibiscus** project will be documented in this file.
 
-## [1.1.0] - 2026-01-12
+## [2.0.0] - 2024-05-23
 
-### Added
-- **Custom Media Directory**: Choose where to save your images and videos
-- **Model Badges in Gallery**: See which model was used for each creation
-- **Random Seed Generation**: Each generation is unique when seed is set to -1
-- **Modular Architecture**: Code split into reusable modules:
-  - `i18n.js` - Internationalization (PT/EN/ES)
-  - `logger.js` - Logging system
-  - `state.js` - State management
-  - `backend.js` - Backend API client
+### 🚀 Major Changes
+- **Architecture**: Completely removed Electron dependency. Now runs as a lightweight Node.js server with a web interface accessible via browser.
+- **Parallel Generation**: New batch processing system allows generating multiple images/videos simultaneously without blocking the UI.
+- **Gallery Search**: Added real-time search functionality to filter gallery items by prompt.
 
-### Changed
-- Reduced main app.js from 3332 to 2484 lines (~25% reduction)
-- Improved code organization and maintainability
-- Updated Electron build scripts
+### ✨ New Features
+- **Video Generation**: Added support for video generation using 'Veo' and 'Seedance' models.
+- **Editor Improvements**:
+    - **Paste Support**: Directly paste images (Ctrl+V) into the editor tab.
+    - **Multi-Image Support**: Upload or paste multiple images for reference.
+- **Backend Improvements**:
+    - **Favorites**: Added PATCH endpoint `/api/gallery/:id` to toggle favorite status, persistent in `gallery.json`.
+    - **Static Serving**: Improved static file serving with absolute paths.
+- **UI/UX**:
+    - **Quality Parameter**: Now context-aware, only visible when a GPT model is selected to avoid confusion.
+    - **Random Seed**: Fixed `-1` seed behavior to generate a unique random seed for *every* request in a batch, ensuring variety.
+    - **Resolution Multiplier**: Easier toggles for 1x, 2x, 4x upscaling.
 
-### Fixed
-- Images no longer repeat when using the same prompt (random seed fix)
-- Better error handling in backend communication
+### 🛠 Fixes & Refactoring
+- **Code Cleanups**:
+    - Removed legacy `main.js` and build scripts related to Electron.
+    - Consolidated global variables into `window.Hibiscus` (work in progress).
+    - Extracted `parseAPIError` utility for consistent error handling.
+    - Fixed duplicate `updateBalanceUI` definitions.
+- **Performance**:
+    - Optimized model loading list.
+    - Better error handling for API timeouts and rate limits.
 
-## [1.0.0] - 2026-01-11
+### 📦 Installation
+- Simplified installation process: just run `run.bat` (Windows) or `node server.js`.
+- Removed complex build requirements.
 
-### Initial Release
-- Image Generation with multiple models (Flux, Turbo, GPT-Image, etc.)
-- Image Editing (img2img) with multi-image support
-- Video Generation with Veo and Seedance models
-- Smart Gallery with date organization
-- Auto-Download functionality
-- Multi-language support (PT/EN/ES)
-- Dark and Light themes
-- Electron desktop app support
-- Smart retry with safety filter handling
+---
+*Hibiscus Team*

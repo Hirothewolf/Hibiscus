@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hibiscus 🌺</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- First Run / Language & API Modal -->
     <div class="modal hidden" id="setupModal">
@@ -29,7 +32,8 @@
                 <div class="form-group">
                     <label data-i18n="setup.apiKey">Chave de API</label>
                     <input type="password" id="setupApiKey" placeholder="pk_... ou sk_...">
-                    <small data-i18n="setup.apiKeyHint">Para maiores limites, obtenha em <a href="https://enter.pollinations.ai" target="_blank">enter.pollinations.ai</a></small>
+                    <small data-i18n="setup.apiKeyHint">Para maiores limites, obtenha em <a
+                            href="https://enter.pollinations.ai" target="_blank">enter.pollinations.ai</a></small>
                 </div>
                 <button class="btn-primary" id="setupConfirmBtn">
                     <span class="btn-icon">✨</span>
@@ -45,8 +49,9 @@
             <div class="logo">
                 <span class="logo-icon">🌺</span>
                 <h1>Hibiscus</h1>
+                <span id="apiBalance" title="Créditos API"></span>
             </div>
-            
+
             <nav class="nav-tabs">
                 <button class="nav-tab active" data-tab="image-gen">
                     <span class="tab-icon">🖼️</span>
@@ -91,12 +96,15 @@
                     <div class="controls-panel">
                         <div class="form-group">
                             <label for="imagePrompt" data-i18n="image.prompt">Prompt</label>
-                            <textarea id="imagePrompt" data-i18n-placeholder="image.promptPlaceholder" placeholder="Descreva a imagem que você quer criar..." rows="4"></textarea>
+                            <textarea id="imagePrompt" data-i18n-placeholder="image.promptPlaceholder"
+                                placeholder="Descreva a imagem que você quer criar..." rows="4"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="imageNegativePrompt" data-i18n="image.negativePrompt">Prompt Negativo</label>
-                            <input type="text" id="imageNegativePrompt" data-i18n-placeholder="image.negativePromptPlaceholder" placeholder="O que evitar na imagem..." value="worst quality, blurry">
+                            <input type="text" id="imageNegativePrompt"
+                                data-i18n-placeholder="image.negativePromptPlaceholder"
+                                placeholder="O que evitar na imagem..." value="worst quality, blurry">
                         </div>
 
                         <div class="form-row">
@@ -140,16 +148,26 @@
                         <div class="form-group">
                             <label data-i18n="image.aspectRatio">Proporção</label>
                             <div class="aspect-ratio-buttons" id="imageAspectRatios">
-                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024" data-h="1024">1:1</button>
-                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832" data-h="1248">2:3</button>
-                                <button type="button" class="aspect-btn" data-ratio="3:2" data-w="1248" data-h="832">3:2</button>
-                                <button type="button" class="aspect-btn" data-ratio="3:4" data-w="896" data-h="1152">3:4</button>
-                                <button type="button" class="aspect-btn" data-ratio="4:3" data-w="1152" data-h="896">4:3</button>
-                                <button type="button" class="aspect-btn" data-ratio="4:5" data-w="896" data-h="1088">4:5</button>
-                                <button type="button" class="aspect-btn" data-ratio="5:4" data-w="1088" data-h="896">5:4</button>
-                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768" data-h="1344">9:16</button>
-                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344" data-h="768">16:9</button>
-                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536" data-h="640">21:9</button>
+                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024"
+                                    data-h="1024">1:1</button>
+                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832"
+                                    data-h="1248">2:3</button>
+                                <button type="button" class="aspect-btn" data-ratio="3:2" data-w="1248"
+                                    data-h="832">3:2</button>
+                                <button type="button" class="aspect-btn" data-ratio="3:4" data-w="896"
+                                    data-h="1152">3:4</button>
+                                <button type="button" class="aspect-btn" data-ratio="4:3" data-w="1152"
+                                    data-h="896">4:3</button>
+                                <button type="button" class="aspect-btn" data-ratio="4:5" data-w="896"
+                                    data-h="1088">4:5</button>
+                                <button type="button" class="aspect-btn" data-ratio="5:4" data-w="1088"
+                                    data-h="896">5:4</button>
+                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768"
+                                    data-h="1344">9:16</button>
+                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344"
+                                    data-h="768">16:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536"
+                                    data-h="640">21:9</button>
                             </div>
                         </div>
 
@@ -226,6 +244,25 @@
                                 <span>🔄</span> <span data-i18n="btn.regenerate">Regenerar</span>
                             </button>
                         </div>
+
+                        <!-- Active Jobs Queue -->
+                        <div class="job-queue-panel hidden" id="jobQueueTxt2Img">
+                            <div class="job-queue-header">
+                                <h4>🔄 <span data-i18n="jobs.active">Gerações Ativas</span> <span class="job-count"
+                                        id="jobCountTxt2Img">0</span></h4>
+                            </div>
+                            <div class="job-queue-list" id="jobListTxt2Img"></div>
+                        </div>
+
+                        <!-- Recent Generations (5 thumbnails) -->
+                        <div class="recents-section">
+                            <h4 data-i18n="recents.title">Geradas recentemente</h4>
+                            <div class="recents-container" id="recentsContainer">
+                                <div class="recents-empty">
+                                    <small data-i18n="recents.empty">Nenhuma geração recente</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -243,19 +280,24 @@
                             <label data-i18n="edit.refImages">Imagens de Referência (suporta múltiplas)</label>
                             <div class="image-upload-area" id="editImageUpload">
                                 <input type="file" id="editImageFile" accept="image/*" hidden>
-                                <input type="text" id="editImageUrl" data-i18n-placeholder="edit.urlPlaceholder" placeholder="Cole URL e pressione Enter, ou faça upload">
-                                <button class="btn-upload" id="editUploadBtn">📤 <span data-i18n="btn.upload">Upload</span></button>
+                                <input type="text" id="editImageUrl" data-i18n-placeholder="edit.urlPlaceholder"
+                                    placeholder="Cole URL e pressione Enter, ou faça upload">
+                                <button class="btn-upload" id="editUploadBtn">📤 <span
+                                        data-i18n="btn.upload">Upload</span></button>
                             </div>
-                            <small class="form-hint" data-i18n="edit.hint">Você pode adicionar várias imagens. URLs são processadas mais rápido.</small>
+                            <small class="form-hint" data-i18n="edit.hint">Você pode adicionar várias imagens. URLs são
+                                processadas mais rápido.</small>
                             <div class="uploaded-preview hidden" id="editUploadedPreview">
                                 <img id="editSourceImage" alt="Source image">
-                                <button class="btn-remove" id="removeEditImage" data-i18n="edit.clearAll">✕ Limpar Todas</button>
+                                <button class="btn-remove" id="removeEditImage" data-i18n="edit.clearAll">✕ Limpar
+                                    Todas</button>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="editPrompt" data-i18n="edit.promptLabel">Prompt de Edição</label>
-                            <textarea id="editPrompt" data-i18n-placeholder="edit.promptPlaceholder" placeholder="Descreva as modificações que você quer fazer..." rows="4"></textarea>
+                            <textarea id="editPrompt" data-i18n-placeholder="edit.promptPlaceholder"
+                                placeholder="Descreva as modificações que você quer fazer..." rows="4"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -264,6 +306,16 @@
                                 <option value="kontext">Kontext (Edição)</option>
                                 <option value="gptimage">GPT Image</option>
                                 <option value="flux">Flux</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editQuality" data-i18n="image.quality">Qualidade (apenas GPT)</label>
+                            <select id="editQuality">
+                                <option value="low" data-i18n="image.qualityLow">Baixa</option>
+                                <option value="medium" selected data-i18n="image.qualityMedium">Média</option>
+                                <option value="high" data-i18n="image.qualityHigh">Alta</option>
+                                <option value="hd">HD</option>
                             </select>
                         </div>
 
@@ -280,16 +332,26 @@
                         <div class="form-group">
                             <label data-i18n="image.aspectRatio">Proporção</label>
                             <div class="aspect-ratio-buttons" id="editAspectRatios">
-                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024" data-h="1024">1:1</button>
-                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832" data-h="1248">2:3</button>
-                                <button type="button" class="aspect-btn" data-ratio="3:2" data-w="1248" data-h="832">3:2</button>
-                                <button type="button" class="aspect-btn" data-ratio="3:4" data-w="896" data-h="1152">3:4</button>
-                                <button type="button" class="aspect-btn" data-ratio="4:3" data-w="1152" data-h="896">4:3</button>
-                                <button type="button" class="aspect-btn" data-ratio="4:5" data-w="896" data-h="1088">4:5</button>
-                                <button type="button" class="aspect-btn" data-ratio="5:4" data-w="1088" data-h="896">5:4</button>
-                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768" data-h="1344">9:16</button>
-                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344" data-h="768">16:9</button>
-                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536" data-h="640">21:9</button>
+                                <button type="button" class="aspect-btn active" data-ratio="1:1" data-w="1024"
+                                    data-h="1024">1:1</button>
+                                <button type="button" class="aspect-btn" data-ratio="2:3" data-w="832"
+                                    data-h="1248">2:3</button>
+                                <button type="button" class="aspect-btn" data-ratio="3:2" data-w="1248"
+                                    data-h="832">3:2</button>
+                                <button type="button" class="aspect-btn" data-ratio="3:4" data-w="896"
+                                    data-h="1152">3:4</button>
+                                <button type="button" class="aspect-btn" data-ratio="4:3" data-w="1152"
+                                    data-h="896">4:3</button>
+                                <button type="button" class="aspect-btn" data-ratio="4:5" data-w="896"
+                                    data-h="1088">4:5</button>
+                                <button type="button" class="aspect-btn" data-ratio="5:4" data-w="1088"
+                                    data-h="896">5:4</button>
+                                <button type="button" class="aspect-btn" data-ratio="9:16" data-w="768"
+                                    data-h="1344">9:16</button>
+                                <button type="button" class="aspect-btn" data-ratio="16:9" data-w="1344"
+                                    data-h="768">16:9</button>
+                                <button type="button" class="aspect-btn" data-ratio="21:9" data-w="1536"
+                                    data-h="640">21:9</button>
                             </div>
                         </div>
 
@@ -363,6 +425,25 @@
                                 <span>✏️</span> <span data-i18n="edit.continue">Continuar Editando</span>
                             </button>
                         </div>
+
+                        <!-- Active Jobs Queue -->
+                        <div class="job-queue-panel hidden" id="jobQueueImg2Img">
+                            <div class="job-queue-header">
+                                <h4>🔄 <span data-i18n="jobs.active">Edições Ativas</span> <span class="job-count"
+                                        id="jobCountImg2Img">0</span></h4>
+                            </div>
+                            <div class="job-queue-list" id="jobListImg2Img"></div>
+                        </div>
+
+                        <!-- Recent Edits (5 thumbnails) -->
+                        <div class="recents-section">
+                            <h4 data-i18n="recents.title">Editadas recentemente</h4>
+                            <div class="recents-container" id="editRecentsContainer">
+                                <div class="recents-empty">
+                                    <small data-i18n="recents.empty">Nenhuma edição recente</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -378,7 +459,8 @@
                     <div class="controls-panel">
                         <div class="form-group">
                             <label for="videoPrompt" data-i18n="video.prompt">Prompt</label>
-                            <textarea id="videoPrompt" data-i18n-placeholder="video.promptPlaceholder" placeholder="Descreva o vídeo que você quer criar..." rows="4"></textarea>
+                            <textarea id="videoPrompt" data-i18n-placeholder="video.promptPlaceholder"
+                                placeholder="Descreva o vídeo que você quer criar..." rows="4"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -394,8 +476,10 @@
                             <label data-i18n="video.refImage">Imagem de Referência (Opcional)</label>
                             <div class="image-upload-area" id="videoImageUpload">
                                 <input type="file" id="videoImageFile" accept="image/*" hidden>
-                                <input type="text" id="videoImageUrl" data-i18n-placeholder="video.refImagePlaceholder" placeholder="URL da imagem inicial (para Seedance)">
-                                <button class="btn-upload" id="videoUploadBtn">📤 <span data-i18n="btn.upload">Upload</span></button>
+                                <input type="text" id="videoImageUrl" data-i18n-placeholder="video.refImagePlaceholder"
+                                    placeholder="URL da imagem inicial (para Seedance)">
+                                <button class="btn-upload" id="videoUploadBtn">📤 <span
+                                        data-i18n="btn.upload">Upload</span></button>
                             </div>
                             <div class="uploaded-preview hidden" id="videoUploadedPreview">
                                 <img id="videoSourceImage" alt="Source image">
@@ -417,7 +501,8 @@
                             <div class="form-group">
                                 <label for="videoAspectRatio" data-i18n="video.aspectRatio">Proporção</label>
                                 <select id="videoAspectRatio">
-                                    <option value="16:9">16:9 (<span data-i18n="video.landscape">Paisagem</span>)</option>
+                                    <option value="16:9">16:9 (<span data-i18n="video.landscape">Paisagem</span>)
+                                    </option>
                                     <option value="9:16">9:16 (<span data-i18n="video.portrait">Retrato</span>)</option>
                                 </select>
                             </div>
@@ -453,7 +538,8 @@
                             <div class="preview-placeholder">
                                 <span class="placeholder-icon">🎬</span>
                                 <p data-i18n="video.placeholder">Seu vídeo aparecerá aqui</p>
-                                <small data-i18n="video.placeholderHint">Vídeos podem levar alguns minutos para gerar</small>
+                                <small data-i18n="video.placeholderHint">Vídeos podem levar alguns minutos para
+                                    gerar</small>
                             </div>
                             <video id="videoPreview" class="preview-video hidden" controls></video>
                             <div class="loading-overlay hidden" id="videoLoading">
@@ -470,6 +556,15 @@
                                 <span>🔄</span> <span data-i18n="btn.regenerate">Regenerar</span>
                             </button>
                         </div>
+
+                        <!-- Active Jobs Queue -->
+                        <div class="job-queue-panel hidden" id="jobQueueVideo">
+                            <div class="job-queue-header">
+                                <h4>🔄 <span data-i18n="jobs.active">Vídeos em Geração</span> <span class="job-count"
+                                        id="jobCountVideo">0</span></h4>
+                            </div>
+                            <div class="job-queue-list" id="jobListVideo"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -482,10 +577,17 @@
                 </div>
 
                 <div class="gallery-controls">
+                    <div class="gallery-search">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="gallerySearch" data-i18n-placeholder="gallery.search"
+                            placeholder="Buscar por prompt...">
+                    </div>
                     <div class="gallery-filters">
                         <button class="filter-btn active" data-filter="all" data-i18n="gallery.all">Todos</button>
                         <button class="filter-btn" data-filter="image" data-i18n="gallery.images">Imagens</button>
                         <button class="filter-btn" data-filter="video" data-i18n="gallery.videos">Vídeos</button>
+                        <button class="filter-btn filter-favorites" data-filter="favorites"
+                            data-i18n="gallery.favorites">⭐ Favoritos</button>
                     </div>
                     <div class="gallery-actions">
                         <button class="btn-secondary" id="downloadAllBtn">
@@ -505,6 +607,22 @@
                         <small data-i18n="gallery.emptyHint">Gere imagens ou vídeos para vê-los aqui</small>
                     </div>
                 </div>
+
+                <!-- Pagination Controls -->
+                <div class="gallery-pagination hidden" id="galleryPagination">
+                    <button class="pagination-btn" id="paginationPrev" disabled>
+                        <span>◀</span> <span data-i18n="gallery.prev">Anterior</span>
+                    </button>
+                    <div class="pagination-info">
+                        <span data-i18n="gallery.page">Página</span>
+                        <span id="paginationCurrent">1</span>
+                        <span data-i18n="gallery.of">de</span>
+                        <span id="paginationTotal">1</span>
+                    </div>
+                    <button class="pagination-btn" id="paginationNext" disabled>
+                        <span data-i18n="gallery.next">Próxima</span> <span>▶</span>
+                    </button>
+                </div>
             </section>
 
             <!-- Settings Tab -->
@@ -522,9 +640,12 @@
                             <div class="form-group">
                                 <label for="apiKey" data-i18n="settings.apiKey">Chave de API</label>
                                 <input type="password" id="apiKey" placeholder="pk_... ou sk_...">
-                                <small><span data-i18n="settings.apiKeyHint">Obtenha sua chave em</span> <a href="https://enter.pollinations.ai" target="_blank">enter.pollinations.ai</a></small>
+                                <small><span data-i18n="settings.apiKeyHint">Obtenha sua chave em</span> <a
+                                        href="https://enter.pollinations.ai"
+                                        target="_blank">enter.pollinations.ai</a></small>
                             </div>
-                            <button class="btn-secondary" id="saveApiKey" data-i18n="settings.saveKey">Salvar Chave</button>
+                            <button class="btn-secondary" id="saveApiKey" data-i18n="settings.saveKey">Salvar
+                                Chave</button>
                         </div>
 
                         <div class="settings-section">
@@ -534,14 +655,16 @@
                                     <input type="checkbox" id="autoDownloadEnabled">
                                     <span data-i18n="settings.autoDownloadEnable">Ativar download automático</span>
                                 </label>
-                                <small data-i18n="settings.autoDownloadHint">Baixa automaticamente todas as criações</small>
+                                <small data-i18n="settings.autoDownloadHint">Baixa automaticamente todas as
+                                    criações</small>
                             </div>
                             <div class="form-group">
                                 <label for="filenameFormat" data-i18n="settings.filenameFormat">Formato do Nome</label>
                                 <select id="filenameFormat">
                                     <option value="prompt" data-i18n="settings.filenamePrompt">Prompt resumido</option>
                                     <option value="timestamp" data-i18n="settings.filenameTimestamp">Timestamp</option>
-                                    <option value="both" selected data-i18n="settings.filenameBoth">Prompt + Timestamp</option>
+                                    <option value="both" selected data-i18n="settings.filenameBoth">Prompt + Timestamp
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -553,13 +676,16 @@
                                     <input type="checkbox" id="useCustomMediaDir">
                                     <span data-i18n="settings.useCustomDir">Usar diretório personalizado</span>
                                 </label>
-                                <small data-i18n="settings.mediaDirHint">Por padrão, usa a pasta da galeria do aplicativo</small>
+                                <small data-i18n="settings.mediaDirHint">Por padrão, usa a pasta da galeria do
+                                    aplicativo</small>
                             </div>
                             <div class="form-group" id="customDirGroup" style="display: none;">
                                 <label for="customMediaDir" data-i18n="settings.customDir">Pasta Personalizada</label>
                                 <div class="dir-select-row">
-                                    <input type="text" id="customMediaDir" readonly placeholder="Selecione uma pasta...">
-                                    <button class="btn-secondary" id="selectMediaDirBtn">📂 <span data-i18n="settings.browse">Procurar</span></button>
+                                    <input type="text" id="customMediaDir" readonly
+                                        placeholder="Selecione uma pasta...">
+                                    <button class="btn-secondary" id="selectMediaDirBtn">📂 <span
+                                            data-i18n="settings.browse">Procurar</span></button>
                                 </div>
                             </div>
                         </div>
@@ -586,6 +712,21 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="settings-section">
+                            <h3>💾 <span data-i18n="settings.backupRestore">Backup & Restauração</span></h3>
+                            <div class="settings-backup-actions">
+                                <button class="btn-secondary" onclick="exportSettings()">
+                                    <span>📤</span> <span data-i18n="settings.export">Exportar Configurações</span>
+                                </button>
+                                <label class="btn-secondary btn-import">
+                                    <span>📥</span> <span data-i18n="settings.import">Importar Configurações</span>
+                                    <input type="file" accept=".json" onchange="handleSettingsImport(event)" hidden>
+                                </label>
+                            </div>
+                            <small data-i18n="settings.backupHint">Exporte suas configurações para backup ou transfira
+                                para outro dispositivo</small>
+                        </div>
                     </div>
 
                     <!-- Right Column -->
@@ -611,6 +752,12 @@
                         <div class="settings-section settings-logs-section">
                             <h3>🪵 <span data-i18n="settings.logs">Logs de Sistema</span></h3>
                             <div class="logs-actions">
+                                <select id="logsFilter" class="logs-filter">
+                                    <option value="all" data-i18n="settings.logsAll">Todos</option>
+                                    <option value="info" data-i18n="settings.logsInfo">Info</option>
+                                    <option value="warn" data-i18n="settings.logsWarn">Avisos</option>
+                                    <option value="error" data-i18n="settings.logsError">Erros</option>
+                                </select>
                                 <button class="btn-secondary" id="refreshLogsBtn">
                                     <span>🔄</span> <span data-i18n="settings.logsRefresh">Atualizar</span>
                                 </button>
@@ -640,16 +787,22 @@
         <div class="modal-content">
             <button class="modal-close" id="closeModal">✕</button>
             <div class="modal-media">
+                <button class="modal-nav prev hidden" id="modalPrev">❮</button>
                 <img id="modalImage" class="hidden" alt="Preview">
                 <video id="modalVideo" class="hidden" controls></video>
+                <button class="modal-nav next hidden" id="modalNext">❯</button>
             </div>
             <div class="modal-info">
                 <p class="modal-prompt" id="modalPrompt"></p>
                 <p class="modal-date" id="modalDate"></p>
                 <div class="modal-actions">
+                    <button class="btn-secondary" id="modalFavorite" onclick="toggleFavorite()">☆ <span
+                            data-i18n="gallery.favorite">Favoritar</span></button>
                     <button class="btn-secondary" id="modalEdit">✏️ <span data-i18n="btn.edit">Editar</span></button>
-                    <button class="btn-secondary" id="modalDownload">📥 <span data-i18n="btn.download">Download</span></button>
-                    <button class="btn-secondary" id="modalDelete">🗑️ <span data-i18n="btn.delete">Excluir</span></button>
+                    <button class="btn-secondary" id="modalDownload">📥 <span
+                            data-i18n="btn.download">Download</span></button>
+                    <button class="btn-secondary" id="modalDelete">🗑️ <span
+                            data-i18n="btn.delete">Excluir</span></button>
                 </div>
             </div>
         </div>
@@ -657,17 +810,38 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-        <span data-i18n="footer.madeWith">Feito com</span> 🤍 <span data-i18n="footer.by">por</span> <a href="https://github.com/Hirothewolf" target="_blank" rel="noopener noreferrer">Hirothewolf</a>
+        <span data-i18n="footer.madeWith">Feito com</span> 🤍 <span data-i18n="footer.by">por</span> <a
+            href="https://github.com/Hirothewolf" target="_blank" rel="noopener noreferrer">Hirothewolf</a>
         <span class="footer-separator">•</span>
-        <span data-i18n="footer.poweredBy">Powered by</span> <a href="https://pollinations.ai/" target="_blank" rel="noopener noreferrer" class="pollinations-link">🐝 Pollinations.ai</a>
+        <span data-i18n="footer.poweredBy">Powered by</span> <a href="https://pollinations.ai/" target="_blank"
+            rel="noopener noreferrer" class="pollinations-link">🐝 Pollinations.ai</a>
     </footer>
 
-    <!-- Módulos -->
+    <!-- Core Modules -->
     <script src="modules/i18n.js"></script>
     <script src="modules/logger.js"></script>
     <script src="modules/state.js"></script>
     <script src="modules/backend.js"></script>
-    <!-- App principal -->
+
+    <!-- New Core Utilities -->
+    <script src="modules/core/utils.js"></script>
+    <script src="modules/core/api.js"></script>
+
+    <!-- UI Modules -->
+    <script src="modules/ui/ui-manager.js"></script>
+    <script src="modules/ui/settings.js"></script>
+
+    <!-- Gallery Module -->
+    <script src="modules/gallery/gallery.js"></script>
+
+    <!-- Generator Modules -->
+    <script src="modules/generators/image-gen.js"></script>
+    <script src="modules/generators/video-gen.js"></script>
+    <script src="modules/generators/editor.js"></script>
+    <script src="modules/generators/batch.js"></script>
+
+    <!-- App Orchestrator (last) -->
     <script src="app.js"></script>
 </body>
+
 </html>

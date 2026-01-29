@@ -52,59 +52,24 @@
 
 ## 🚀 Quick Start
 
-### Run Instantly
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-**Windows:**
-```cmd
-run.bat
-```
+2. **Start the App:**
 
-**Linux / macOS:**
-```bash
-chmod +x run.sh && ./run.sh
-```
+   **Windows:**
+   ```cmd
+   run.bat
+   ```
+
+   **Linux / macOS:**
+   ```bash
+   ./run.sh
+   ```
 
 The app will open at `http://localhost:3333`
-
----
-
-## 📦 Installation Options
-
-<details>
-<summary><strong>🖥️ Desktop App (Electron)</strong></summary>
-
-Build a standalone executable:
-
-**Windows:**
-```cmd
-build.bat
-```
-
-**Linux / macOS:**
-```bash
-chmod +x build.sh && ./build.sh
-```
-
-Find the installer in the `dist/` folder.
-
-</details>
-
-<details>
-<summary><strong>📥 Full Installation</strong></summary>
-
-**Windows:**
-```cmd
-install.bat
-```
-
-**Linux / macOS:**
-```bash
-chmod +x install.sh && ./install.sh
-```
-
-Creates desktop shortcuts and configures everything automatically.
-
-</details>
 
 ---
 
@@ -137,20 +102,27 @@ For higher rate limits and premium models, get your API key at:
 Hibiscus/
 ├── app/
 │   ├── index.html      # Main UI
-│   ├── styles.css      # Styling  
+│   ├── styles.css      # Styling (Imports) 
 │   ├── app.js          # Frontend logic
 │   ├── server.js       # Backend server
-│   ├── modules/        # Modular components (v1.1+)
+│   ├── css/            # Modular CSS
+│   │   ├── core/       # Variables, reset, animations
+│   │   ├── layout/     # Layout scaffolding
+│   │   ├── components/ # UI components
+│   │   └── modules/    # Feature-specific styles
+│   ├── modules/        # JavaScript Modules
+│   │   ├── core/       # Core utilities
+│   │   ├── gallery/    # Gallery logic
+│   │   ├── generators/ # Image/Video generation logic
+│   │   ├── ui/         # UI management
 │   │   ├── i18n.js     # Internationalization
 │   │   ├── logger.js   # Logging system
 │   │   ├── state.js    # State management
 │   │   └── backend.js  # Backend API client
-│   └── gallery/        # Saved media
+│   └── gallery/        # Saved Media Storage
 │       ├── images/     # By date (DD-MM-YYYY)
 │       └── videos/     # By date (DD-MM-YYYY)
 ├── run.bat / run.sh    # Quick start scripts
-├── build.bat / build.sh # Electron build scripts
-├── main.js             # Electron main process
 └── package.json        # Dependencies
 ```
 
@@ -160,7 +132,6 @@ Hibiscus/
 
 - **Node.js** v16 or higher
 - **Internet connection** for API access
-- ~2GB disk space (for Electron builds)
 
 ---
 
@@ -193,8 +164,6 @@ Hibiscus/
 - 🎲 **Random Seed Fix** - Each generation now produces unique results
 - 🏷️ **Model Badges** - Gallery shows which model was used for each creation
 - 📂 **Custom Media Directory** - Choose where to save your files
-- 🖥️ **Electron Desktop App** - Standalone Windows executable
-- 🔧 **Build Scripts** - Easy build process with build.bat
 
 ### v1.0.0
 - 🎨 Initial release with image/video generation

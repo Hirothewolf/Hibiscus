@@ -26,7 +26,7 @@ const translations = {
         'image.negativePrompt': 'Prompt Negativo',
         'image.negativePromptPlaceholder': 'O que evitar na imagem...',
         'image.model': 'Modelo',
-        'image.quality': 'Qualidade',
+        'image.quality': 'Qualidade (apenas GPT)',
         'image.qualityLow': 'Baixa',
         'image.qualityMedium': 'Média',
         'image.qualityHigh': 'Alta',
@@ -38,9 +38,13 @@ const translations = {
         'image.seedRandom': '-1 para aleatório',
         'image.guidance': 'Guidance Scale',
         'image.resolutionMultiplier': 'Multiplicador de Resolução',
+        'image.resolutionMultiplier': 'Multiplicador de Resolução',
         'image.resolutionWarning': '⚠️ Alguns modelos podem não suportar essa resolução',
+        'image.resNormal': 'Qualidade Normal',
+        'image.resHD': 'Qualidade HD (2x)',
+        'image.resUltra': 'Ultra HD (4x)',
         'image.enhance': 'Melhorar prompt com IA',
-        'image.transparent': 'Fundo transparente',
+        'image.transparent': 'Fundo transparente (apenas GPT)',
         'image.noLogo': 'Sem marca d\'água',
         'image.safeFilter': 'Filtro de segurança',
         'image.generate': 'Gerar Imagem',
@@ -68,6 +72,7 @@ const translations = {
         'video.refImage': 'Imagem de Referência (Opcional)',
         'video.refImagePlaceholder': 'URL da imagem inicial (para Seedance)',
         'video.duration': 'Duração (segundos)',
+        'video.seconds': 'segundos',
         'video.aspectRatio': 'Proporção',
         'video.landscape': 'Paisagem',
         'video.portrait': 'Retrato',
@@ -126,10 +131,33 @@ const translations = {
         'settings.logsClear': 'Limpar',
         'settings.logsEmpty': 'Nenhum log registrado',
         'settings.logsConfirmClear': 'Limpar todos os logs?',
+        'settings.logsAll': 'Todos',
+        'settings.logsInfo': 'Info',
+        'settings.logsWarn': 'Avisos',
+        'settings.logsError': 'Erros',
         // Toasts & Messages
         'toast.safetyRetry': 'Filtro de segurança detectado ({failures} falhas). Tentativa {current}... Aguarde ou cancele.',
         'toast.safetyCancel': 'Geração cancelada pelo usuário',
+        'toast.cancelled': 'Cancelado',
         'toast.safetySuccess': 'Imagem gerada após {attempts} tentativas!',
+        'toast.serverError': 'Modelo {model} indisponível. Tente outro modelo.',
+        'toast.safetyBlocked': 'Conteúdo bloqueado pelo filtro de segurança.',
+        // Job Queue
+        'jobs.active': 'Gerações Ativas',
+        'jobs.pending': 'Na fila',
+        'jobs.running': 'Gerando...',
+        'jobs.retry': 'Retry {current}/{max}',
+        'jobs.failed': 'Falhou',
+        'jobs.blockedByFilter': 'Bloqueado pelo filtro',
+        // Error Messages (User-Friendly)
+        'error.serverUnavailable': 'Modelo {model} indisponível no momento. Tente outro modelo.',
+        'error.serverGeneric': 'Erro no servidor. Tente novamente em alguns instantes.',
+        'error.safetyBlocked': 'Conteúdo bloqueado pelo filtro de segurança.',
+        'error.authRequired': 'Chave de API inválida ou não configurada.',
+        'error.insufficientBalance': 'Saldo insuficiente. Adicione créditos em enter.pollinations.ai',
+        'error.rateLimit': 'Muitas requisições. Aguarde um momento.',
+        'error.timeout': 'Tempo limite excedido. Tente novamente.',
+        'error.network': 'Erro de conexão. Verifique sua internet.',
         'toast.generating': 'Gerando...',
         'toast.success': 'Sucesso!',
         'toast.error': 'Erro',
@@ -154,6 +182,10 @@ const translations = {
         'toast.videoError': 'Erro ao gerar vídeo: {error}',
         'toast.imageTooLarge': 'Imagem muito grande. Use uma imagem menor ou forneça uma URL.',
         'toast.uploadingImage': 'Enviando imagem...',
+        'toast.processingImage': 'Processando imagem {current}/{total}...',
+        'toast.uploadServicesFailed': 'Falha no upload. Todos os serviços falharam.',
+        'toast.safetyRetriesExhausted': 'Falha após {max} tentativas do filtro de segurança',
+        'toast.noImageToUpload': 'Nenhuma imagem para fazer upload',
         'toast.imageUploadFailed': 'Falha ao enviar imagem. Use uma URL externa.',
         'toast.enterEditPrompt': 'Digite um prompt para a edição',
         'toast.enterVideoPrompt': 'Digite um prompt para gerar o vídeo',
@@ -180,7 +212,57 @@ const translations = {
         // Footer
         'footer.madeWith': 'Feito com',
         'footer.by': 'por',
-        'footer.poweredBy': 'Powered by'
+        'footer.poweredBy': 'Powered by',
+        // Favorites
+        'gallery.favorites': 'Favoritos',
+        'gallery.favorite': 'Favoritar',
+        'gallery.unfavorite': 'Remover Favorito',
+        'toast.addedToFavorites': 'Adicionado aos favoritos!',
+        'toast.removedFromFavorites': 'Removido dos favoritos',
+        'gallery.prev': '◀',  // Generic arrow, key kept for future text
+        'gallery.next': '▶',  // Generic arrow
+        // Backup
+        'settings.backupRestore': 'Backup & Restauração',
+        'settings.export': 'Exportar Configurações',
+        'settings.import': 'Importar Configurações',
+        'settings.backupHint': 'Exporte suas configurações para backup ou transfira para outro dispositivo',
+        'toast.settingsExported': 'Configurações exportadas!',
+        'toast.settingsImported': 'Configurações importadas!',
+        'toast.importError': 'Erro ao importar configurações',
+        // Jobs
+        'jobs.title': 'Fila de Jobs',
+        'jobs.empty': 'Nenhum job na fila',
+        'jobs.emptyHint': 'Gere imagens para ver jobs aqui',
+        'jobs.active': 'ativo',
+        'jobs.actives': 'ativos',
+        'jobs.pending': 'pendente',
+        'jobs.pendings': 'pendentes',
+        'jobs.clearCompleted': 'Limpar concluídos',
+        'jobs.cleared': 'Jobs limpos',
+        'toast.jobAdded': 'Gerando imagem...',
+        'toast.jobComplete': 'Imagem gerada!',
+        'toast.jobFailed': 'Falha ao gerar',
+        'toast.jobCancelled': 'Job cancelado',
+        'toast.uploadingImage': 'Enviando imagem...',
+        'toast.imageUploadFailed': 'Falha ao enviar imagem.',
+        'jobs.blockedByFilter': 'Bloqueado (Filtro)',
+        'jobs.retry': 'Tentando novamente ({current}/{max})',
+        'toast.imagePasted': 'Imagem colada!',
+        'toast.loadingImage': 'Carregando imagem...',
+        // Recents
+        'recents.title': 'Geradas recentemente',
+        'recents.empty': 'Nenhuma geração recente',
+        // Missing
+        'gallery.noFavorites': 'Nenhum favorito ainda',
+        'gallery.noFavoritesHint': 'Clique no ⭐ em uma imagem para adicionar aos favoritos',
+        'gallery.noImages': 'Nenhuma imagem ainda',
+        'gallery.noVideos': 'Nenhum vídeo ainda',
+        'gallery.search': 'Buscar por prompt...', // Added
+        'toast.selectImage': 'Selecione ao menos uma imagem',
+        'toast.sentToEdit': 'Imagem enviada para edição',
+        'toast.editReady': 'Imagem pronta para edição!',
+        'toast.imageProcessError': 'Erro ao processar imagem: {error}',
+        'error.resolutionTooHigh': 'Resolução muito alta para este modelo. Tente reduzir o tamanho.'
     },
     en: {
         // Setup Modal
@@ -204,7 +286,7 @@ const translations = {
         'image.negativePrompt': 'Negative Prompt',
         'image.negativePromptPlaceholder': 'What to avoid in the image...',
         'image.model': 'Model',
-        'image.quality': 'Quality',
+        'image.quality': 'Quality (GPT Only)',
         'image.qualityLow': 'Low',
         'image.qualityMedium': 'Medium',
         'image.qualityHigh': 'High',
@@ -217,8 +299,11 @@ const translations = {
         'image.guidance': 'Guidance Scale',
         'image.resolutionMultiplier': 'Resolution Multiplier',
         'image.resolutionWarning': '⚠️ Some models may not support this resolution',
+        'image.resNormal': 'Normal Quality',
+        'image.resHD': 'HD Quality (2x)',
+        'image.resUltra': 'Ultra HD (4x)',
         'image.enhance': 'Enhance prompt with AI',
-        'image.transparent': 'Transparent background',
+        'image.transparent': 'Transparent background (GPT Only)',
         'image.noLogo': 'No watermark',
         'image.safeFilter': 'Safety filter',
         'image.generate': 'Generate Image',
@@ -246,6 +331,7 @@ const translations = {
         'video.refImage': 'Reference Image (Optional)',
         'video.refImagePlaceholder': 'Initial image URL (for Seedance)',
         'video.duration': 'Duration (seconds)',
+        'video.seconds': 'seconds',
         'video.aspectRatio': 'Aspect Ratio',
         'video.landscape': 'Landscape',
         'video.portrait': 'Portrait',
@@ -304,10 +390,32 @@ const translations = {
         'settings.logsClear': 'Clear',
         'settings.logsEmpty': 'No logs recorded',
         'settings.logsConfirmClear': 'Clear all logs?',
+        'settings.logsAll': 'All',
+        'settings.logsInfo': 'Info',
+        'settings.logsWarn': 'Warnings',
+        'settings.logsError': 'Errors',
         // Toasts & Messages
         'toast.safetyRetry': 'Safety filter triggered ({failures} failures). Attempt {current}... Wait or cancel.',
         'toast.safetyCancel': 'Generation cancelled by user',
+        'toast.cancelled': 'Cancelled',
         'toast.safetySuccess': 'Image generated after {attempts} attempts!',
+        'toast.serverError': 'Model {model} unavailable. Try another model.',
+        'toast.safetyBlocked': 'Content blocked by safety filter.',
+        // Job Queue
+        'jobs.active': 'Active Generations',
+        'jobs.pending': 'In queue',
+        'jobs.running': 'Generating...',
+        'jobs.retry': 'Retry {current}/{max}',
+        'jobs.failed': 'Failed',
+        'jobs.blockedByFilter': 'Blocked by filter',
+        'error.serverUnavailable': 'Model {model} is currently unavailable. Try another model.',
+        'error.serverGeneric': 'Server error. Please try again.',
+        'error.safetyBlocked': 'Content blocked by safety filter.',
+        'error.authRequired': 'Invalid or missing API key.',
+        'error.insufficientBalance': 'Insufficient balance. Add credits at enter.pollinations.ai',
+        'error.rateLimit': 'Too many requests. Please wait.',
+        'error.timeout': 'Request timed out. Please try again.',
+        'error.network': 'Connection error. Check your internet.',
         'toast.generating': 'Generating...',
         'toast.success': 'Success!',
         'toast.error': 'Error',
@@ -332,6 +440,10 @@ const translations = {
         'toast.videoError': 'Error generating video: {error}',
         'toast.imageTooLarge': 'Image too large. Use a smaller image or provide a URL.',
         'toast.uploadingImage': 'Uploading image...',
+        'toast.processingImage': 'Processing image {current}/{total}...',
+        'toast.uploadServicesFailed': 'Upload failed. All services failed.',
+        'toast.safetyRetriesExhausted': 'Failed after {max} safety filter attempts',
+        'toast.noImageToUpload': 'No image to upload',
         'toast.imageUploadFailed': 'Failed to upload image. Use an external URL.',
         'toast.enterEditPrompt': 'Enter a prompt for the edit',
         'toast.enterVideoPrompt': 'Enter a prompt to generate the video',
@@ -341,24 +453,74 @@ const translations = {
         'toast.onlyImagesEdit': 'Only images can be edited',
         'toast.loadImageError': 'Error loading image',
         'toast.fileNotAvailable': 'File not available',
-        'toast.apiKeySaved': 'API Key saved!',
-        'toast.logsExported': 'Logs exported!',
-        'toast.logsCleared': 'Logs cleared',
+        'toast.apiKeySaved': 'API Key saved!', // Updated
+        'toast.logsExported': 'Logs exported!', // Updated
+        'toast.logsCleared': 'Logs cleared', // Updated
         // Buttons
-        'btn.cancel': 'Cancel',
-        'btn.download': 'Download',
-        'btn.edit': 'Edit',
-        'btn.regenerate': 'Regenerate',
-        'btn.upload': 'Upload',
+        'btn.cancel': 'Cancel', // Updated
+        'btn.download': 'Download', // Updated
+        'btn.edit': 'Edit', // Updated
+        'btn.regenerate': 'Regenerate', // Updated
+        'btn.upload': 'Upload', // Updated
         'btn.add': 'Add',
-        'btn.delete': 'Delete',
+        'btn.delete': 'Delete', // Updated
         // Auto-download status
         'status.autoDownloadOn': 'Auto-download: ON',
         'status.autoDownloadOff': 'Auto-download: OFF',
         // Footer
         'footer.madeWith': 'Made with',
         'footer.by': 'by',
-        'footer.poweredBy': 'Powered by'
+        'footer.poweredBy': 'Powered by',
+        // Favorites
+        'gallery.favorites': 'Favorites',
+        'gallery.favorite': 'Favorite',
+        'gallery.unfavorite': 'Remove Favorite',
+        'toast.addedToFavorites': 'Added to favorites!',
+        'toast.removedFromFavorites': 'Removed from favorites',
+        'gallery.prev': '◀',
+        'gallery.next': '▶',
+        // Backup
+        'settings.backupRestore': 'Backup & Restore',
+        'settings.export': 'Export Settings',
+        'settings.import': 'Import Settings',
+        'settings.backupHint': 'Export your settings for backup or transfer to another device',
+        'toast.settingsExported': 'Settings exported!',
+        'toast.settingsImported': 'Settings imported!',
+        'toast.importError': 'Error importing settings',
+        // Jobs
+        'jobs.title': 'Jobs Queue',
+        'jobs.empty': 'No jobs in queue',
+        'jobs.emptyHint': 'Generate images to see jobs here',
+        'jobs.active': 'active',
+        'jobs.actives': 'active',
+        'jobs.pending': 'pending',
+        'jobs.pendings': 'pending',
+        'jobs.clearCompleted': 'Clear completed',
+        'jobs.cleared': 'Jobs cleared',
+        'toast.jobAdded': 'Generating image...',
+        'toast.jobComplete': 'Image generated!',
+        'toast.jobFailed': 'Generation failed',
+        'toast.jobCancelled': 'Job cancelled',
+        'toast.uploadingImage': 'Uploading image...',
+        'toast.imageUploadFailed': 'Failed to upload image.',
+        'jobs.blockedByFilter': 'Blocked (Filter)',
+        'jobs.retry': 'Retrying ({current}/{max})',
+        'toast.imagePasted': 'Image pasted!',
+        'toast.loadingImage': 'Loading image...',
+        // Recents
+        'recents.title': 'Recently generated',
+        'recents.empty': 'No recent generations',
+        // Missing
+        'gallery.noFavorites': 'No favorites yet',
+        'gallery.noFavoritesHint': 'Click ⭐ on an image to add to favorites',
+        'gallery.noImages': 'No images yet',
+        'gallery.noVideos': 'No videos yet',
+        'gallery.search': 'Search by prompt...', // Added
+        'toast.selectImage': 'Select at least one image',
+        'toast.sentToEdit': 'Image sent to editor',
+        'toast.editReady': 'Image ready for editing!',
+        'toast.imageProcessError': 'Error processing image: {error}',
+        'error.resolutionTooHigh': 'Resolution too high for this model. Try reducing the size.'
     },
     es: {
         // Setup Modal
@@ -382,7 +544,7 @@ const translations = {
         'image.negativePrompt': 'Prompt Negativo',
         'image.negativePromptPlaceholder': 'Qué evitar en la imagen...',
         'image.model': 'Modelo',
-        'image.quality': 'Calidad',
+        'image.quality': 'Calidad (solo GPT)', // Updated
         'image.qualityLow': 'Baja',
         'image.qualityMedium': 'Media',
         'image.qualityHigh': 'Alta',
@@ -395,8 +557,11 @@ const translations = {
         'image.guidance': 'Guidance Scale',
         'image.resolutionMultiplier': 'Multiplicador de Resolución',
         'image.resolutionWarning': '⚠️ Algunos modelos pueden no soportar esta resolución',
+        'image.resNormal': 'Calidad Normal',
+        'image.resHD': 'Calidad HD (2x)',
+        'image.resUltra': 'Ultra HD (4x)',
         'image.enhance': 'Mejorar prompt con IA',
-        'image.transparent': 'Fondo transparente',
+        'image.transparent': 'Fondo transparente (solo GPT)', // Updated
         'image.noLogo': 'Sin marca de agua',
         'image.safeFilter': 'Filtro de seguridad',
         'image.generate': 'Generar Imagen',
@@ -424,6 +589,7 @@ const translations = {
         'video.refImage': 'Imagen de Referencia (Opcional)',
         'video.refImagePlaceholder': 'URL de imagen inicial (para Seedance)',
         'video.duration': 'Duración (segundos)',
+        'video.seconds': 'segundos',
         'video.aspectRatio': 'Proporción',
         'video.landscape': 'Paisaje',
         'video.portrait': 'Retrato',
@@ -482,10 +648,32 @@ const translations = {
         'settings.logsClear': 'Limpiar',
         'settings.logsEmpty': 'Sin logs registrados',
         'settings.logsConfirmClear': '¿Limpiar todos los logs?',
+        'settings.logsAll': 'Todos',
+        'settings.logsInfo': 'Info',
+        'settings.logsWarn': 'Avisos',
+        'settings.logsError': 'Errores',
         // Toasts & Messages
         'toast.safetyRetry': 'Filtro de seguridad detectado ({failures} fallos). Intento {current}... Espera o cancela.',
         'toast.safetyCancel': 'Generación cancelada por el usuario',
+        'toast.cancelled': 'Cancelado',
         'toast.safetySuccess': '¡Imagen generada después de {attempts} intentos!',
+        'toast.serverError': 'Modelo {model} no disponible. Prueba otro modelo.',
+        'toast.safetyBlocked': 'Contenido bloqueado por el filtro de seguridad.',
+        // Job Queue
+        'jobs.active': 'Generaciones Activas',
+        'jobs.pending': 'En cola',
+        'jobs.running': 'Generando...',
+        'jobs.retry': 'Reintento {current}/{max}',
+        'jobs.failed': 'Falló',
+        'jobs.blockedByFilter': 'Bloqueado por el filtro',
+        'error.serverUnavailable': 'Modelo {model} no disponible en este momento. Prueba otro modelo.',
+        'error.serverGeneric': 'Error del servidor. Por favor intenta de nuevo.',
+        'error.safetyBlocked': 'Contenido bloqueado por el filtro de seguridad.',
+        'error.authRequired': 'Clave API inválida o no configurada.',
+        'error.insufficientBalance': 'Saldo insuficiente. Añade créditos en enter.pollinations.ai',
+        'error.rateLimit': 'Demasiadas solicitudes. Por favor espera.',
+        'error.timeout': 'Tiempo de espera agotado. Por favor intenta de nuevo.',
+        'error.network': 'Error de conexión. Verifica tu internet.',
         'toast.generating': 'Generando...',
         'toast.success': '¡Éxito!',
         'toast.error': 'Error',
@@ -510,6 +698,10 @@ const translations = {
         'toast.videoError': 'Error al generar video: {error}',
         'toast.imageTooLarge': 'Imagen muy grande. Usa una imagen más pequeña o proporciona una URL.',
         'toast.uploadingImage': 'Subiendo imagen...',
+        'toast.processingImage': 'Procesando imagen {current}/{total}...',
+        'toast.uploadServicesFailed': 'Error de subida. Todos los servicios fallaron.',
+        'toast.safetyRetriesExhausted': 'Falló después de {max} intentos del filtro de seguridad',
+        'toast.noImageToUpload': 'No hay imagen para subir',
         'toast.imageUploadFailed': 'Error al subir imagen. Usa una URL externa.',
         'toast.enterEditPrompt': 'Ingresa un prompt para la edición',
         'toast.enterVideoPrompt': 'Ingresa un prompt para generar el video',
@@ -536,7 +728,57 @@ const translations = {
         // Footer
         'footer.madeWith': 'Hecho con',
         'footer.by': 'por',
-        'footer.poweredBy': 'Powered by'
+        'footer.poweredBy': 'Powered by',
+        // Favorites
+        'gallery.favorites': 'Favoritos',
+        'gallery.favorite': 'Favorito',
+        'gallery.unfavorite': 'Quitar Favorito',
+        'toast.addedToFavorites': '¡Agregado a favoritos!',
+        'toast.removedFromFavorites': 'Eliminado de favoritos',
+        'gallery.prev': '◀',
+        'gallery.next': '▶',
+        // Backup
+        'settings.backupRestore': 'Backup y Restauración',
+        'settings.export': 'Exportar Configuración',
+        'settings.import': 'Importar Configuración',
+        'settings.backupHint': 'Exporta tu configuración para backup o transfiere a otro dispositivo',
+        'toast.settingsExported': '¡Configuración exportada!',
+        'toast.settingsImported': '¡Configuración importada!',
+        'toast.importError': 'Error al importar configuración',
+        // Jobs
+        'jobs.title': 'Cola de Jobs',
+        'jobs.empty': 'Sin jobs en cola',
+        'jobs.emptyHint': 'Genera imágenes para ver jobs aquí',
+        'jobs.active': 'activo',
+        'jobs.actives': 'activos',
+        'jobs.pending': 'pendiente',
+        'jobs.pendings': 'pendientes',
+        'jobs.clearCompleted': 'Limpiar completados',
+        'jobs.cleared': 'Jobs limpiados',
+        'toast.jobAdded': 'Generando imagen...',
+        'toast.jobComplete': '¡Imagen generada!',
+        'toast.jobFailed': 'Error al generar',
+        'toast.jobCancelled': 'Job cancelado',
+        // Recents
+        'recents.title': 'Generadas recientemente',
+        'recents.empty': 'Sin generaciones recientes',
+        // Missing
+        'gallery.noFavorites': 'Sin favoritos aún',
+        'gallery.noFavoritesHint': 'Haz clic en ⭐ en una imagen para añadir a favoritos',
+        'gallery.noImages': 'Sin imágenes aún',
+        'gallery.noVideos': 'Sin videos aún',
+        'gallery.search': 'Buscar por prompt...', // Added
+        'toast.selectImage': 'Selecciona al menos una imagen',
+        'toast.sentToEdit': 'Imagen enviada al editor',
+        'toast.editReady': '¡Imagen lista para editar!',
+        'toast.imageProcessError': 'Error al procesar imagen: {error}',
+        'error.resolutionTooHigh': 'Resolución muy alta para este modelo. Intenta reducir el tamaño.',
+        'toast.uploadingImage': 'Subiendo imagen...',
+        'toast.imageUploadFailed': 'Fallo al subir imagen.',
+        'jobs.blockedByFilter': 'Bloqueado (Filtro)',
+        'jobs.retry': 'Reintentando ({current}/{max})',
+        'toast.imagePasted': '¡Imagen pegada!',
+        'toast.loadingImage': 'Cargando imagen...'
     }
 };
 
@@ -546,7 +788,7 @@ const translations = {
 const i18n = {
     current: 'pt',
     translations,
-    
+
     /**
      * Obtém uma tradução pela chave
      * @param {string} key - Chave da tradução
@@ -560,7 +802,7 @@ const i18n = {
         });
         return text;
     },
-    
+
     /**
      * Define o idioma atual
      * @param {string} lang - Código do idioma (pt, en, es)
@@ -569,8 +811,9 @@ const i18n = {
         this.current = lang;
         localStorage.setItem('language', lang);
         this.updateUI();
+        window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
     },
-    
+
     /**
      * Atualiza todos os elementos da UI com as traduções
      */
@@ -584,7 +827,7 @@ const i18n = {
             el.placeholder = this.t(key);
         });
     },
-    
+
     /**
      * Inicializa o idioma salvo ou detecta do navegador
      */

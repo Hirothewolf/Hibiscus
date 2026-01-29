@@ -1,0 +1,93 @@
+/* ===== App Layout ===== */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== Main Content ===== */
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: 32px;
+    min-height: 100vh;
+    position: relative;
+    /* Ensure footer positioning works if absolute */
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.content-header {
+    margin-bottom: 32px;
+}
+
+.content-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.content-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* ===== Generation Layout ===== */
+.generation-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.controls-panel {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+}
+
+/* ===== Footer ===== */
+.app-footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    margin-top: 100px;
+    /* Spacing from content */
+}
+
+.app-footer a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.app-footer a:hover {
+    color: var(--accent-secondary);
+    text-decoration: underline;
+}
+
+.footer-separator {
+    margin: 0 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.pollinations-link {
+    color: #fbbf24 !important;
+    font-weight: 500;
+}
+
+.pollinations-link:hover {
+    color: #f59e0b !important;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}

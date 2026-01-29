@@ -7,14 +7,14 @@ const BACKEND_URL = 'http://localhost:3333';
 
 const Backend = {
     available: false,
-    
+
     /**
      * Verifica conexão com o backend
      * @returns {Promise<boolean>} true se conectado
      */
     async checkConnection() {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/stats`, { 
+            const response = await fetch(`${BACKEND_URL}/api/stats`, {
                 method: 'GET',
                 signal: AbortSignal.timeout(2000)
             });
@@ -27,7 +27,7 @@ const Backend = {
             return false;
         }
     },
-    
+
     /**
      * Carrega galeria do backend
      * @returns {Promise<Array|null>} Lista de itens ou null
@@ -44,7 +44,7 @@ const Backend = {
         }
         return null;
     },
-    
+
     /**
      * Salva item na galeria
      * @param {string} type - Tipo (image/video)
@@ -57,12 +57,12 @@ const Backend = {
         if (!this.available) return null;
         try {
             const body = { type, prompt, params, blob };
-            
+
             // Add custom directory if configured
             if (typeof state !== 'undefined' && state.useCustomMediaDir && state.customMediaDir) {
                 body.customDir = state.customMediaDir;
             }
-            
+
             const response = await fetch(`${BACKEND_URL}/api/gallery`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,7 @@ const Backend = {
         }
         return null;
     },
-    
+
     /**
      * Remove item da galeria
      * @param {string} id - ID do item
@@ -94,7 +94,28 @@ const Backend = {
         }
         return false;
     },
-    
+
+    /**
+     * Atualiza campos de um item da galeria
+     * @param {string} id - ID do item
+     * @param {Object} updates - Campos a atualizar (ex: { favorite: true })
+     * @returns {Promise<boolean>} true se atualizado
+     */
+    async updateItem(id, updates) {
+        if (!this.available) return false;
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/gallery/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            return response.ok;
+        } catch (error) {
+            Logger.error('Failed to update item in backend', { error: error.message });
+        }
+        return false;
+    },
+
     /**
      * Atualiza estatísticas
      * @param {Object} stats - Objeto de estatísticas
@@ -114,7 +135,7 @@ const Backend = {
         }
         return false;
     },
-    
+
     /**
      * Limpa toda a galeria
      * @returns {Promise<boolean>} true se limpa

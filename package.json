@@ -2,14 +2,9 @@
   "name": "hibiscus",
   "version": "1.2.0",
   "description": "AI Image & Video Generation Studio powered by Pollinations.ai",
-  "main": "main.js",
+  "main": "app/server.js",
   "scripts": {
-    "start": "node app/server.js",
-    "start:electron": "electron .",
-    "build": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux",
-    "build:mac": "electron-builder --mac"
+    "start": "node app/server.js"
   },
   "author": "Hibiscus",
   "license": "MIT",
@@ -22,71 +17,11 @@
     "creative",
     "hibiscus"
   ],
-  "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1",
-    "electron-icon-builder": "^2.0.1"
-  },
-  "build": {
-    "appId": "com.hibiscus.studio",
-    "productName": "Hibiscus",
-    "asar": false,
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "app/**/*",
-      "main.js",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "app/gallery",
-        "to": "gallery",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "app/icons/win/icon.ico",
-      "signAndEditExecutable": false
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "app/icons/win/icon.ico",
-      "uninstallerIcon": "app/icons/win/icon.ico",
-      "installerHeaderIcon": "app/icons/win/icon.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Hibiscus"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "icon": "app/icons/png",
-      "category": "Graphics"
-    },
-    "mac": {
-      "target": [
-        "dmg"
-      ],
-      "icon": "app/icons/mac/icon.icns",
-      "category": "public.app-category.graphics-design"
-    }
-  },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
   }
 }

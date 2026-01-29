@@ -1,13 +1,13 @@
 @echo off
-REM Hibiscus - Run Script (Web Mode)
-REM Use this to run Hibiscus in your browser without Electron
+REM Hibiscus - Run Script
+REM Starts the Hibiscus Web Server
 title Hibiscus - AI Art Studio
 
 cd /d "%~dp0app"
 
 echo.
-echo    Hibiscus - AI Art Studio (Web Mode)
-echo    =====================================
+echo    Hibiscus - AI Art Studio
+echo    =========================
 echo.
 
 REM Create gallery folder if not exists
