@@ -19,18 +19,6 @@
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License"/>
 </p>
 
-<p align="center">
-  <img src="Hibiscus1.png" alt="Hibiscus - Image Generation" width="100%"/>
-</p>
-
-<p align="center">
-  <img src="Hibiscus2.png" alt="Hibiscus - Gallery" width="100%"/>
-</p>
-
-<p align="center">
-  <img src="Hibiscus3.png" alt="Hibiscus - Video Generation" width="100%"/>
-</p>
-
 ---
 
 ## ✨ Features
@@ -40,17 +28,20 @@
 | 🎨 **Image Generation** | Create stunning images with Flux, Turbo, GPT-Image, and more |
 | ✏️ **Image Editing** | Transform existing images with AI-powered img2img |
 | 🎬 **Video Generation** | Generate videos with Veo, Seedance models |
+| � **Gallery Search** | Real-time search by prompt in your gallery |
+| 🚀 **Parallel Generation** | Generate multiple images/videos simultaneously |
 | 📁 **Smart Gallery** | Automatic organization by date with model badges |
 | 💾 **Auto-Download** | Save creations automatically to organized folders |
 | 📂 **Custom Media Dir** | Choose where to save your creations |
 | 🔄 **Smart Retry** | Exponential backoff + safety filter persistence |
 | 🌍 **Multi-Language** | Portuguese, English, and Spanish |
 | 🎭 **Themes** | Dark and Light mode support |
-| 📦 **Modular Code** | Clean architecture with separated modules |
 
 ---
 
-## 🚀 Quick Start
+## � Quick Start
+
+Hibiscus runs as a local web server. You can access it via your browser.
 
 1. **Install Dependencies:**
    ```bash
@@ -64,12 +55,12 @@
    run.bat
    ```
 
-   **Linux / macOS:**
+   **Generic (Node.js):**
    ```bash
-   ./run.sh
+   npm start
    ```
 
-The app will open at `http://localhost:3333`
+   The app will open at `http://localhost:3333`
 
 ---
 
@@ -77,9 +68,9 @@ The app will open at `http://localhost:3333`
 
 1. **Choose Language** - Select PT/EN/ES on first run
 2. **Generate Image** - Enter prompt → Select model & settings → Generate
-3. **Edit Image** - Upload image(s) → Describe changes → Apply
+3. **Edit Image** - Paste (Ctrl+V) or Upload image(s) → Describe changes → Apply
 4. **Generate Video** - Enter prompt → Choose duration → Generate
-5. **Gallery** - View, download, edit, or delete creations
+5. **Gallery** - View, search, download, edit, or delete creations
 6. **Settings** - Configure API key, auto-download, theme
 
 ---
@@ -104,14 +95,14 @@ Hibiscus/
 │   ├── index.html      # Main UI
 │   ├── styles.css      # Styling (Imports) 
 │   ├── app.js          # Frontend logic
-│   ├── server.js       # Backend server
+│   ├── server.js       # Backend server (Express)
 │   ├── css/            # Modular CSS
 │   │   ├── core/       # Variables, reset, animations
 │   │   ├── layout/     # Layout scaffolding
 │   │   ├── components/ # UI components
 │   │   └── modules/    # Feature-specific styles
 │   ├── modules/        # JavaScript Modules
-│   │   ├── core/       # Core utilities
+│   │   ├── core/       # Core utilities (api, utils)
 │   │   ├── gallery/    # Gallery logic
 │   │   ├── generators/ # Image/Video generation logic
 │   │   ├── ui/         # UI management
@@ -119,39 +110,24 @@ Hibiscus/
 │   │   ├── logger.js   # Logging system
 │   │   ├── state.js    # State management
 │   │   └── backend.js  # Backend API client
-│   └── gallery/        # Saved Media Storage
+│   └── gallery/        # Saved Media Storage used by server
 │       ├── images/     # By date (DD-MM-YYYY)
 │       └── videos/     # By date (DD-MM-YYYY)
-├── run.bat / run.sh    # Quick start scripts
+├── run.bat             # Windows Start Script
 └── package.json        # Dependencies
 ```
 
 ---
 
-## 🛠️ Requirements
+## � Changelog
 
-- **Node.js** v16 or higher
-- **Internet connection** for API access
-
----
-
-## 🔗 Links
-
-<p align="center">
-  <a href="https://pollinations.ai/">
-    <img src="https://img.shields.io/badge/🐝%20Pollinations.ai-Platform-fbbf24?style=flat-square" alt="Pollinations"/>
-  </a>
-  <a href="https://gen.pollinations.ai/">
-    <img src="https://img.shields.io/badge/📚%20API-Documentation-339933?style=flat-square" alt="API Docs"/>
-  </a>
-  <a href="https://github.com/pollinations/pollinations">
-    <img src="https://img.shields.io/badge/GitHub-Pollinations-181717?style=flat-square&logo=github" alt="GitHub"/>
-  </a>
-</p>
-
----
-
-## 📋 Changelog
+### v2.0.0 (Hibiscus sabdariffa)
+- 🚀 **Web Architecture** - Removed Electron dependency, now runs as a lightweight Node.js server
+- 🔍 **Gallery Search** - Filter gallery items by prompt instantly
+- ⚡ **Parallel Generation** - Support for multiple simultaneous generation jobs
+- 🎬 **Video Generation** - Added Wan model
+- 📋 **Paste Support** - Paste images directly into the editor
+- ⭐ **Favorites** - Persist favorite items via backend API
 
 ### v1.2.0 (January 2026)
 - 🔢 **Resolution Multiplier** - 1x, 2x, 4x toggle for high-res output on image & img2img
@@ -164,12 +140,6 @@ Hibiscus/
 - 🎲 **Random Seed Fix** - Each generation now produces unique results
 - 🏷️ **Model Badges** - Gallery shows which model was used for each creation
 - 📂 **Custom Media Directory** - Choose where to save your files
-
-### v1.0.0
-- 🎨 Initial release with image/video generation
-- 🌍 Multi-language support (PT/EN/ES)
-- 📁 Smart gallery with date organization
-- 💾 Auto-download feature
 
 ---
 
